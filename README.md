@@ -18,7 +18,7 @@ This project is developed by a team of **6 members** with the goal of making qui
   The website is designed to be intuitive and easy to use for everyone.  
 
 ## 📬 Contact  
-- 🌍 Website: [dev-plus-quiz-website-ai.vercel.app](dev-plus-quiz-website-ai.vercel.app)  
+- 🌍 Website: [dev-plus-quiz-website-ai.vercel.app]([dev-plus-quiz-website-ai.vercel.app](https://team1-devplus.github.io/DevPlus_QuizWebsiteAI/))  
 
 ---
 
