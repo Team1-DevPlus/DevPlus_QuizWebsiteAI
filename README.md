@@ -23,3 +23,5 @@ This project is developed by a team of **6 members** with the goal of making qui
 ---
 
 ✨ Thank you for your interest in our project! 🚀  
+
+<img width="1255" alt="image" src="https://github.com/user-attachments/assets/3c5d5f16-1519-4232-92c6-debd3fde42ff" />
