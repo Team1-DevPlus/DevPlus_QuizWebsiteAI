@@ -1,72 +1,99 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trắc nghiệm AI</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <div class="container">
-        <div class="quiz-card">
-            <h1 class="title">Trắc nghiệm AI</h1>
-            
-            <!-- Setup Section -->
-            <div id="setup-section" class="section">
-                <div class="form-group">
-                    <input type="text" id="topic" placeholder="Nhập chủ đề...">
-                    <input type="number" id="question-count" placeholder="Số câu hỏi" min="1" max="10">
-                </div>
-                <button onclick="generateQuestions()" class="btn btn-primary">
-                    Tạo câu hỏi
-                </button>
-                <div id="loading" class="loading hidden">
-                    <div class="spinner"></div>
-                    <p>Đang tạo câu hỏi...</p>
-                </div>
-            </div>
-            
-            <!-- Quiz Section -->
-            <div id="quiz-section" class="section hidden">
-                <div class="quiz-header">
-                    <div class="quiz-progress">
-                        Câu hỏi <span id="current-question">1</span>/<span id="total-questions">5</span>
-                    </div>
-                    <div class="quiz-score">
-                        Điểm: <span id="current-score">0</span>/<span id="max-score">0</span>
-                    </div>
-                </div>
-                
-                <div id="question-container" class="question-container"></div>
-                
-                <div class="quiz-navigation">
-                    <button id="prev-btn" onclick="previousQuestion()" class="btn btn-secondary hidden">
-                        Câu trước
-                    </button>
-                    <button id="next-btn" onclick="nextQuestion()" class="btn btn-primary hidden">
-                        Câu tiếp theo
-                    </button>
-                    <button id="finish-btn" onclick="finishQuiz()" class="btn btn-success hidden">
-                        Hoàn thành
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Results Section -->
-            <div id="results-section" class="section hidden">
-                <h2>Kết quả</h2>
-                <div class="final-score">
-                    <span id="final-score">0</span>/<span id="final-max-score">0</span>
-                </div>
-                <div id="detailed-results"></div>
-                <p id="result-message">Chúc mừng! Bạn đã hoàn thành bài kiểm tra.</p>
-                <button onclick="resetQuiz()" class="btn btn-primary">
-                    Làm lại
-                </button>
-            </div>
-        </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-center mb-6">Trắc nghiệm AI</h1>
 
+        <!-- Setup Section -->
+        <div id="setup-section" class="section mb-6">
+          <div class="mb-4">
+            <input
+              type="text"
+              id="topic"
+              placeholder="Nhập chủ đề..."
+              class="w-full p-3 rounded-md border border-gray-300 mb-4"
+            />
+            <input
+              type="number"
+              id="question-count"
+              placeholder="Số câu hỏi"
+              min="1"
+              max="10"
+              class="w-full p-3 rounded-md border border-gray-300"
+            />
+          </div>
+          <button
+            onclick="startQuiz()"
+            class="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Bắt đầu
+          </button>
+        </div>
+
+        <!-- Confirm Section -->
+        <div id="confirm-section" class="hidden">
+          <h2 class="text-xl font-semibold mb-4">Xác nhận bài kiểm tra</h2>
+          <p id="confirm-question" class="mb-4"></p>
+          <button
+            onclick="startQuizFlow()"
+            class="w-full p-3 bg-green-500 text-white rounded-md hover:bg-green-600"
+          >
+            Xác nhận
+          </button>
+          <button
+            onclick="cancelQuiz()"
+            class="w-full p-3 bg-red-500 text-white rounded-md hover:bg-red-600 mt-4"
+          >
+            Hủy
+          </button>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="hidden">
+          <div class="mb-4">
+            <p id="current-question-text" class="text-lg font-medium"></p>
+            <input
+              type="text"
+              id="user-answer"
+              placeholder="Nhập câu trả lời..."
+              class="w-full p-3 rounded-md border border-gray-300"
+            />
+          </div>
+          <button
+            onclick="submitAnswer()"
+            class="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Nộp câu trả lời
+          </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="hidden text-center">
+          <h2 class="text-xl font-semibold mb-4">Kết quả</h2>
+          <p id="final-score" class="text-2xl font-bold mb-4"></p>
+          <button
+            onclick="resetQuiz()"
+            class="w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Làm lại
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./js/script.js"></script>
+  </body>
+</html>
