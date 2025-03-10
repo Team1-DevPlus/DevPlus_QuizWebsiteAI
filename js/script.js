@@ -3,6 +3,7 @@ let questions = [];
 let currentQuestionIndex = 0;
 let userAnswers = [];
 let currentScore = 0;
+let maxQuestions = 0;
 
 async function generateQuestions() {
   const topic = document.getElementById("topic").value;
@@ -10,11 +11,13 @@ async function generateQuestions() {
     document.getElementById("question-count").value
   );
 
-  if (!topic || isNaN(count) || count < 1 || count > 10) {
-    alert("Vui lòng nhập chủ đề và số câu hỏi hợp lệ (1-10)!");
+  if (!topic || isNaN(count) || count < 1 || count > 50) {
+    alert("Vui lòng nhập chủ đề và số câu hỏi hợp lệ (1-50)!");
     return;
   }
 
+  maxQuestions = count;
+  
   // Hiển thị loading
   document.getElementById("loading").classList.remove("hidden");
 
@@ -588,10 +591,12 @@ async function replaceQuestion(index) {
 }
 
 async function addNewQuestion() {
-  if (questions.length >= 10) {
-    alert("Bài quiz chỉ có tối đa 10 câu hỏi. Không thể thêm câu hỏi mới!");
-    return;
-  }
+   if (questions.length >= maxQuestions) {
+     alert(
+       `Bài quiz chỉ có tối đa ${maxQuestions} câu hỏi. Không thể thêm câu hỏi mới!`
+     );
+     return;
+   }
   const topic = document.getElementById("topic").value;
 
   const apiUrl =
