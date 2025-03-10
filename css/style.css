@@ -447,3 +447,24 @@ button:hover {
 .hidden {
   display: none;
 }
+
+.preview-actions {
+  display: flex;
+  gap: 10px; 
+  margin-top: 20px;
+}
+
+.preview-actions button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #4CAF50; 
+  color: white; 
+  transition: background-color 0.3s ease;
+}
+
+.preview-actions button:hover {
+  background-color: #45a049; 
+}
