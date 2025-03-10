@@ -13,7 +13,7 @@ async function generateQuestions() {
     return;
   }
 
-  // Hiển thị loading
+  // hiển thị loading
   document.getElementById("loading").classList.remove("hidden");
 
   const apiUrl =
