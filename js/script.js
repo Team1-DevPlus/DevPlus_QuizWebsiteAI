@@ -3,6 +3,7 @@ let questions = [];
 let currentQuestionIndex = 0;
 let userAnswers = [];
 let currentScore = 0;
+let maxQuestions = 0;
 
 async function generateQuestions() {
   const topic = document.getElementById("topic").value;
@@ -10,11 +11,13 @@ async function generateQuestions() {
     document.getElementById("question-count").value
   );
 
-  if (!topic || isNaN(count) || count < 1 || count > 10) {
-    alert("Vui lòng nhập chủ đề và số câu hỏi hợp lệ (1-10)!");
+  if (!topic || isNaN(count) || count < 1 || count > 50) {
+    alert("Vui lòng nhập chủ đề và số câu hỏi hợp lệ (1-50)!");
     return;
   }
 
+  maxQuestions = count;
+  
   // Hiển thị loading
   document.getElementById("loading").classList.remove("hidden");
 
@@ -90,7 +93,7 @@ function parseQuestion(content) {
     .map((line) => line.trim())
     .filter((line) => line);
   let question = "";
-  let choices = [];
+  const choices = [];
   let correctAnswer = "";
   let reason = "";
 
@@ -385,8 +388,74 @@ function updateNavigationButtons() {
   }
 }
 
-function finishQuiz() {
+function resetQuiz() {
+  // Hide all sections first
+  document.getElementById("results-section").classList.add("hidden");
   document.getElementById("quiz-section").classList.add("hidden");
+  document.getElementById("preview-section").classList.add("hidden");
+
+  // Show only setup section
+  document.getElementById("setup-section").classList.remove("hidden");
+
+  // Clear form fields
+  document.getElementById("topic").value = "";
+  document.getElementById("question-count").value = "";
+
+  // Reset quiz state
+  questions = [];
+  currentQuestionIndex = 0;
+  userAnswers = [];
+  currentScore = 0;
+
+  // Clear all containers
+  document.getElementById("question-container").innerHTML = "";
+  document.getElementById("detailed-results").innerHTML = "";
+  document.getElementById("preview-container").innerHTML = "";
+
+  // Reset background color
+  resetBackgroundColor();
+}
+
+function startQuiz() {
+  if (questions.length === 0) {
+    alert("Không có câu hỏi nào để làm bài. Vui lòng tạo câu hỏi trước!");
+    return;
+  }
+
+  // Hide all sections first
+  document.getElementById("setup-section").classList.add("hidden");
+  document.getElementById("preview-section").classList.add("hidden");
+  document.getElementById("results-section").classList.add("hidden");
+
+  // Show only quiz section
+  document.getElementById("quiz-section").classList.remove("hidden");
+
+  // Reset quiz state for a fresh start
+  currentQuestionIndex = 0;
+  userAnswers = Array(questions.length).fill(null);
+  currentScore = 0;
+
+  // Update UI elements
+  document.getElementById("total-questions").textContent = questions.length;
+  document.getElementById("max-score").textContent = questions.length;
+  document.getElementById("current-score").textContent = "0";
+
+  // Clear any previous question display
+  document.getElementById("question-container").innerHTML = "";
+
+  // Reset background and display first question
+  resetBackgroundColor();
+  displayCurrentQuestion();
+  updateNavigationButtons();
+}
+
+function finishQuiz() {
+  // Hide all sections first
+  document.getElementById("setup-section").classList.add("hidden");
+  document.getElementById("preview-section").classList.add("hidden");
+  document.getElementById("quiz-section").classList.add("hidden");
+
+  // Show only results section
   document.getElementById("results-section").classList.remove("hidden");
 
   document.getElementById("final-score").textContent = currentScore;
@@ -397,7 +466,6 @@ function finishQuiz() {
 
   if (percentage === 100) {
     message = "Tuyệt vời! Bạn đã trả lời đúng tất cả các câu hỏi!";
-    // Hiệu ứng pháo hoa khi hoàn thành xuất sắc
     setTimeout(() => {
       createFireworks();
       setTimeout(() => createFireworks(), 500);
@@ -416,7 +484,7 @@ function finishQuiz() {
 
   // Hiển thị danh sách chi tiết từng câu hỏi
   const detailedResults = document.getElementById("detailed-results");
-  detailedResults.innerHTML = ""; // Xóa nội dung cũ
+  detailedResults.innerHTML = "";
 
   questions.forEach((question, index) => {
     const userAnswer = userAnswers[index] || "Chưa chọn";
@@ -440,26 +508,15 @@ function finishQuiz() {
   });
 }
 
-function resetQuiz() {
-  // Reset to setup screen
-  document.getElementById("results-section").classList.add("hidden");
-  document.getElementById("setup-section").classList.remove("hidden");
-
-  // Clear form fields
-  document.getElementById("topic").value = "";
-  document.getElementById("question-count").value = "";
-
-  // Reset quiz state
-  questions = [];
-  currentQuestionIndex = 0;
-  userAnswers = [];
-  currentScore = 0;
-
-  // Reset background color
-  resetBackgroundColor();
-}
-
 function showPreview() {
+  // Hide all sections first
+  document.getElementById("setup-section").classList.add("hidden");
+  document.getElementById("quiz-section").classList.add("hidden");
+  document.getElementById("results-section").classList.add("hidden");
+
+  // Show only preview section
+  document.getElementById("preview-section").classList.remove("hidden");
+
   const previewContainer = document.getElementById("preview-container");
   previewContainer.innerHTML = "";
 
@@ -479,9 +536,14 @@ function showPreview() {
     previewContainer.innerHTML += questionHtml;
   });
 
-  // Hiển thị phần preview và nút bắt đầu
-  document.getElementById("setup-section").classList.add("hidden");
-  document.getElementById("preview-section").classList.remove("hidden");
+  const addQuestionButton = document.querySelector(
+    "#preview-section button[onclick='addNewQuestion()']"
+  );
+  if (questions.length >= maxQuestions) {
+    addQuestionButton.style.display = "none";
+  } else {
+    addQuestionButton.style.display = "inline-block";
+  }
 }
 
 // Xóa câu hỏi khỏi danh sách
@@ -537,20 +599,57 @@ async function replaceQuestion(index) {
   }
 }
 
-// Khi nhấn "Bắt đầu làm bài"
-function startQuiz() {
-  document.getElementById("preview-section").classList.add("hidden");
-  document.getElementById("quiz-section").classList.remove("hidden");
+async function addNewQuestion() {
+   if (questions.length >= maxQuestions) {
+     alert(
+       `Bài quiz chỉ có tối đa ${maxQuestions} câu hỏi. Không thể thêm câu hỏi mới!`
+     );
+     return;
+   }
+  const topic = document.getElementById("topic").value;
 
-  currentQuestionIndex = 0;
-  userAnswers = Array(questions.length).fill(null);
-  currentScore = 0;
+  const apiUrl =
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDijs4L5KVp8iU09EZIAfZALfxGD4q7epU";
 
-  document.getElementById("total-questions").textContent = questions.length;
-  document.getElementById("max-score").textContent = questions.length;
-  document.getElementById("current-score").textContent = "0";
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `Tạo 1 câu hỏi trắc nghiệm về chủ đề: ${topic}.
+                Câu hỏi có 4 phương án trả lời (A, B, C, D), chỉ có 1 đáp án đúng.
+                Trả về theo định dạng:
+                Câu hỏi: <câu hỏi>
+                A. <đáp án A>
+                B. <đáp án B>
+                C. <đáp án C>
+                D. <đáp án D>
+                Đáp án đúng: <chữ cái đáp án đúng>
+                Lý do: <lý do đáp án đúng>
+                ---`,
+              },
+            ],
+          },
+        ],
+      }),
+    });
 
-  resetBackgroundColor();
-  displayCurrentQuestion();
-  updateNavigationButtons();
+    const data = await response.json();
+    const content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const newQuestion = parseQuestion(content);
+
+    if (newQuestion) {
+      // Thêm câu hỏi mới vào danh sách
+      questions.push(newQuestion);
+      // Cập nhật giao diện xem trước
+      showPreview();
+    }
+  } catch (error) {
+    console.error("Lỗi khi thêm câu hỏi:", error);
+    alert("Không thể thêm câu hỏi. Vui lòng thử lại!");
+  }
 }
