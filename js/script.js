@@ -535,6 +535,15 @@ function showPreview() {
     `;
     previewContainer.innerHTML += questionHtml;
   });
+
+  const addQuestionButton = document.querySelector(
+    "#preview-section button[onclick='addNewQuestion()']"
+  );
+  if (questions.length >= maxQuestions) {
+    addQuestionButton.style.display = "none";
+  } else {
+    addQuestionButton.style.display = "inline-block";
+  }
 }
 
 // Xóa câu hỏi khỏi danh sách
