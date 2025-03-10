@@ -468,3 +468,141 @@ button:hover {
 .preview-actions button:hover {
   background-color: #45a049; 
 }
+
+/* Matching question styles */
+.matching-container {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.matching-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.matching-item {
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+  text-align: center;
+}
+
+.matching-item:hover {
+  background-color: #f0f7ff;
+  border-color: #3b82f6;
+}
+
+.matching-item.selected {
+  background-color: #e6f0fd;
+  border-color: #3b82f6;
+}
+
+.matching-item.correct {
+  background-color: #dcfce7;
+  border-color: #22c55e;
+}
+
+.matching-item.incorrect {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+
+/* Ordering question styles */
+.ordering-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.ordering-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: move;
+  transition: all 0.2s;
+}
+
+.ordering-item:hover {
+  background-color: #f0f7ff;
+  border-color: #3b82f6;
+}
+
+.ordering-number {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e5e7eb;
+  border-radius: 50%;
+  margin-right: 12px;
+  font-weight: bold;
+}
+
+.ordering-text {
+  flex: 1;
+}
+
+.ordering-item.correct {
+  background-color: #dcfce7;
+  border-color: #22c55e;
+}
+
+.ordering-item.incorrect {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+
+.question-type {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.matching-preview {
+  display: flex;
+  gap: 20px;
+  margin: 15px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.matching-preview .matching-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.matching-preview .matching-column div {
+  padding: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.preview-question ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.preview-question ul li {
+  padding: 8px;
+  margin: 4px 0;
+  background: #f8f9fa;
+  border-radius: 4px;
+}

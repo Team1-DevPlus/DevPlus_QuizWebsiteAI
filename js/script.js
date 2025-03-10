@@ -5,6 +5,16 @@ let userAnswers = [];
 let currentScore = 0;
 let maxQuestions = 0;
 
+// Question types
+const QUESTION_TYPES = {
+  MULTIPLE_CHOICE: 'multiple_choice',
+  MATCHING: 'matching',
+  ORDERING: 'ordering'
+};
+
+// Matching question handlers
+let selectedMatchingItem = null;
+
 async function generateQuestions() {
   const topic = document.getElementById("topic").value;
   const count = Number.parseInt(
@@ -34,14 +44,36 @@ async function generateQuestions() {
             parts: [
               {
                 text: `Tạo ${count} câu hỏi trắc nghiệm khác nhau về chủ đề: ${topic}.
-                Mỗi câu hỏi có 4 phương án trả lời (A, B, C, D), trong đó chỉ có 1 đáp án đúng.
+                Mỗi câu hỏi có thể là một trong các dạng sau:
+                1. Câu hỏi trắc nghiệm (4 lựa chọn A, B, C, D)
+                2. Câu nối (matching) - nối các cặp đáp án đúng
+                3. Sắp xếp thứ tự (ordering) - sắp xếp các bước theo đúng thứ tự
+                
                 Trả về mỗi câu hỏi theo định dạng sau và phân tách bằng "---":
+                
+                Dạng câu hỏi: <multiple_choice/matching/ordering>
+                
                 Câu hỏi: <câu hỏi>
+                
+                Nếu là câu trắc nghiệm:
                 A. <đáp án A>
                 B. <đáp án B>
                 C. <đáp án C>
                 D. <đáp án D>
                 Đáp án đúng: <chữ cái đáp án đúng>
+                
+                Nếu là câu nối:
+                Cặp 1: <item 1> - <matching item 1>
+                Cặp 2: <item 2> - <matching item 2>
+                Cặp 3: <item 3> - <matching item 3>
+                Cặp 4: <item 4> - <matching item 4>
+                
+                Nếu là sắp xếp thứ tự:
+                Bước 1: <step 1>
+                Bước 2: <step 2>
+                Bước 3: <step 3>
+                Bước 4: <step 4>
+                
                 Lý do: <lý do đáp án đúng>
                 ---
                 `,
@@ -92,26 +124,56 @@ function parseQuestion(content) {
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line);
+  
+  let questionType = "";
   let question = "";
-  const choices = [];
+  let choices = [];
   let correctAnswer = "";
   let reason = "";
+  let matchingPairs = [];
+  let orderingSteps = [];
 
   lines.forEach((line) => {
-    if (line.startsWith("Câu hỏi:")) {
+    if (line.startsWith("Dạng câu hỏi:")) {
+      questionType = line.replace("Dạng câu hỏi:", "").trim();
+    } else if (line.startsWith("Câu hỏi:")) {
       question = line.replace("Câu hỏi:", "").trim();
     } else if (/^[A-D]\./.test(line)) {
       choices.push(line);
     } else if (line.startsWith("Đáp án đúng:")) {
       correctAnswer = line.replace("Đáp án đúng:", "").trim();
+    } else if (line.startsWith("Cặp")) {
+      const [left, right] = line.split("-").map(item => item.trim());
+      matchingPairs.push({ left, right });
+    } else if (line.startsWith("Bước")) {
+      orderingSteps.push(line.replace(/^Bước \d+:/, "").trim());
     } else if (line.startsWith("Lý do:")) {
       reason = line.replace("Lý do:", "").trim();
     }
   });
 
-  return question && correctAnswer
-    ? { question, choices, correctAnswer, reason }
-    : null;
+  const questionData = {
+    type: questionType,
+    question,
+    reason
+  };
+
+  switch (questionType) {
+    case QUESTION_TYPES.MULTIPLE_CHOICE:
+      questionData.choices = choices;
+      questionData.correctAnswer = correctAnswer;
+      break;
+    case QUESTION_TYPES.MATCHING:
+      questionData.matchingPairs = matchingPairs;
+      questionData.correctAnswer = matchingPairs.map(pair => `${pair.left}-${pair.right}`).join(',');
+      break;
+    case QUESTION_TYPES.ORDERING:
+      questionData.orderingSteps = orderingSteps;
+      questionData.correctAnswer = orderingSteps.join(',');
+      break;
+  }
+
+  return questionData;
 }
 
 function displayCurrentQuestion() {
@@ -127,15 +189,47 @@ function displayCurrentQuestion() {
   const showFeedback = userAnswer !== null;
 
   let questionHtml = `
-        <div class="question-block">
-            <h3>${currentQuestionIndex + 1}. ${currentQuestion.question}</h3>
-            <div class="answer-options">
-    `;
+    <div class="question-block">
+      <h3>${currentQuestionIndex + 1}. ${currentQuestion.question}</h3>
+      <div class="answer-options">
+  `;
 
-  currentQuestion.choices.forEach((choice, index) => {
-    const optionLetter = choice[0]; // A, B, C, or D
+  switch (currentQuestion.type) {
+    case QUESTION_TYPES.MULTIPLE_CHOICE:
+      questionHtml += displayMultipleChoice(currentQuestion, userAnswer, showFeedback);
+      break;
+    case QUESTION_TYPES.MATCHING:
+      questionHtml += displayMatching(currentQuestion, userAnswer, showFeedback);
+      break;
+    case QUESTION_TYPES.ORDERING:
+      questionHtml += displayOrdering(currentQuestion, userAnswer, showFeedback);
+      break;
+  }
+
+  questionHtml += `
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = questionHtml;
+  
+  // Initialize handlers based on question type
+  switch (currentQuestion.type) {
+    case QUESTION_TYPES.MATCHING:
+      initMatchingHandlers();
+      break;
+    case QUESTION_TYPES.ORDERING:
+      initOrderingHandlers();
+      break;
+  }
+}
+
+function displayMultipleChoice(question, userAnswer, showFeedback) {
+  let html = '';
+  question.choices.forEach((choice, index) => {
+    const optionLetter = choice[0];
     const isSelected = userAnswer === optionLetter;
-    const isCorrect = currentQuestion.correctAnswer === optionLetter;
+    const isCorrect = question.correctAnswer === optionLetter;
 
     let optionClass = "answer-option";
     let feedbackIcon = "";
@@ -154,23 +248,60 @@ function displayCurrentQuestion() {
       optionClass += " selected";
     }
 
-    questionHtml += `
-            <div class="${optionClass}" onclick="selectAnswer('${optionLetter}')">
-                <input type="radio" name="q${currentQuestionIndex}" value="${optionLetter}" ${
+    html += `
+      <div class="${optionClass}" onclick="selectAnswer('${optionLetter}')">
+        <input type="radio" name="q${currentQuestionIndex}" value="${optionLetter}" ${
       isSelected ? "checked" : ""
     } ${showFeedback ? "disabled" : ""}>
-                <span>${choice}</span>
-                ${feedbackIcon}
-            </div>
-        `;
-  });
-
-  questionHtml += `
-            </div>
-        </div>
+        <span>${choice}</span>
+        ${feedbackIcon}
+      </div>
     `;
+  });
+  return html;
+}
 
-  container.innerHTML = questionHtml;
+function displayMatching(question, userAnswer, showFeedback) {
+  const pairs = question.matchingPairs;
+  const shuffledPairs = [...pairs].sort(() => Math.random() - 0.5);
+  
+  let html = '<div class="matching-container">';
+  
+  // Left column
+  html += '<div class="matching-column">';
+  shuffledPairs.forEach((pair, index) => {
+    html += `<div class="matching-item" data-index="${index}">${pair.left}</div>`;
+  });
+  html += '</div>';
+  
+  // Right column
+  html += '<div class="matching-column">';
+  shuffledPairs.forEach((pair, index) => {
+    html += `<div class="matching-item" data-index="${index}">${pair.right}</div>`;
+  });
+  html += '</div>';
+  
+  html += '</div>';
+  
+  return html;
+}
+
+function displayOrdering(question, userAnswer, showFeedback) {
+  const steps = question.orderingSteps;
+  const shuffledSteps = [...steps].sort(() => Math.random() - 0.5);
+  
+  let html = '<div class="ordering-container">';
+  shuffledSteps.forEach((step, index) => {
+    html += `
+      <div class="ordering-item" draggable="true" data-index="${index}">
+        <span class="ordering-number">${index + 1}</span>
+        <span class="ordering-text">${step}</span>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  return html;
 }
 
 function selectAnswer(answer) {
@@ -521,12 +652,42 @@ function showPreview() {
   previewContainer.innerHTML = "";
 
   questions.forEach((q, index) => {
-    const questionHtml = `
+    let questionHtml = `
       <div class="preview-question">
         <h3>${index + 1}. ${q.question}</h3>
-        <ul>
-          ${q.choices.map((choice, i) => `<li>${choice}</li>`).join("")}
-        </ul>
+        <div class="question-type">Dạng: ${getQuestionTypeName(q.type)}</div>
+    `;
+
+    switch (q.type) {
+      case QUESTION_TYPES.MULTIPLE_CHOICE:
+        questionHtml += `
+          <ul>
+            ${q.choices.map(choice => `<li>${choice}</li>`).join("")}
+          </ul>
+        `;
+        break;
+      case QUESTION_TYPES.MATCHING:
+        questionHtml += `
+          <div class="matching-preview">
+            <div class="matching-column">
+              ${q.matchingPairs.map(pair => `<div>${pair.left}</div>`).join("")}
+            </div>
+            <div class="matching-column">
+              ${q.matchingPairs.map(pair => `<div>${pair.right}</div>`).join("")}
+            </div>
+          </div>
+        `;
+        break;
+      case QUESTION_TYPES.ORDERING:
+        questionHtml += `
+          <ul>
+            ${q.orderingSteps.map((step, i) => `<li>Bước ${i + 1}: ${step}</li>`).join("")}
+          </ul>
+        `;
+        break;
+    }
+
+    questionHtml += `
         <div class="question-actions">
           <button onclick="deleteQuestion(${index})">🗑 Xóa</button>
           <button onclick="replaceQuestion(${index})">🔄 Thay thế</button>
@@ -543,6 +704,19 @@ function showPreview() {
     addQuestionButton.style.display = "none";
   } else {
     addQuestionButton.style.display = "inline-block";
+  }
+}
+
+function getQuestionTypeName(type) {
+  switch (type) {
+    case QUESTION_TYPES.MULTIPLE_CHOICE:
+      return "Trắc nghiệm";
+    case QUESTION_TYPES.MATCHING:
+      return "Câu nối";
+    case QUESTION_TYPES.ORDERING:
+      return "Sắp xếp thứ tự";
+    default:
+      return "Không xác định";
   }
 }
 
@@ -568,15 +742,37 @@ async function replaceQuestion(index) {
           {
             parts: [
               {
-                text: `Tạo 1 câu hỏi trắc nghiệm về chủ đề: ${topic}.
-                Câu hỏi có 4 phương án trả lời (A, B, C, D), chỉ có 1 đáp án đúng.
-                Trả về theo định dạng:
+                text: `Tạo 1 câu hỏi về chủ đề: ${topic}.
+                Hãy chọn NGẪU NHIÊN một trong ba dạng câu hỏi sau:
+                1. Câu hỏi trắc nghiệm (multiple_choice)
+                2. Câu nối (matching)
+                3. Sắp xếp thứ tự (ordering)
+                
+                Trả về theo định dạng sau:
+                
+                Dạng câu hỏi: <multiple_choice/matching/ordering>
+                
                 Câu hỏi: <câu hỏi>
+                
+                Nếu là câu trắc nghiệm (multiple_choice):
                 A. <đáp án A>
                 B. <đáp án B>
                 C. <đáp án C>
                 D. <đáp án D>
                 Đáp án đúng: <chữ cái đáp án đúng>
+                
+                Nếu là câu nối (matching):
+                Cặp 1: <item 1> - <matching item 1>
+                Cặp 2: <item 2> - <matching item 2>
+                Cặp 3: <item 3> - <matching item 3>
+                Cặp 4: <item 4> - <matching item 4>
+                
+                Nếu là sắp xếp thứ tự (ordering):
+                Bước 1: <step 1>
+                Bước 2: <step 2>
+                Bước 3: <step 3>
+                Bước 4: <step 4>
+                
                 Lý do: <lý do đáp án đúng>
                 ---`,
               },
@@ -596,16 +792,17 @@ async function replaceQuestion(index) {
     }
   } catch (error) {
     console.error("Lỗi khi thay thế câu hỏi:", error);
+    alert("Không thể thay thế câu hỏi. Vui lòng thử lại!");
   }
 }
 
 async function addNewQuestion() {
-   if (questions.length >= maxQuestions) {
-     alert(
-       `Bài quiz chỉ có tối đa ${maxQuestions} câu hỏi. Không thể thêm câu hỏi mới!`
-     );
-     return;
-   }
+  if (questions.length >= maxQuestions) {
+    alert(
+      `Bài quiz chỉ có tối đa ${maxQuestions} câu hỏi. Không thể thêm câu hỏi mới!`
+    );
+    return;
+  }
   const topic = document.getElementById("topic").value;
 
   const apiUrl =
@@ -621,14 +818,36 @@ async function addNewQuestion() {
             parts: [
               {
                 text: `Tạo 1 câu hỏi trắc nghiệm về chủ đề: ${topic}.
-                Câu hỏi có 4 phương án trả lời (A, B, C, D), chỉ có 1 đáp án đúng.
+                Câu hỏi có thể là một trong các dạng sau:
+                1. Câu hỏi trắc nghiệm (4 lựa chọn A, B, C, D)
+                2. Câu nối (matching) - nối các cặp đáp án đúng
+                3. Sắp xếp thứ tự (ordering) - sắp xếp các bước theo đúng thứ tự
+                
                 Trả về theo định dạng:
+                
+                Dạng câu hỏi: <multiple_choice/matching/ordering>
+                
                 Câu hỏi: <câu hỏi>
+                
+                Nếu là câu trắc nghiệm:
                 A. <đáp án A>
                 B. <đáp án B>
                 C. <đáp án C>
                 D. <đáp án D>
                 Đáp án đúng: <chữ cái đáp án đúng>
+                
+                Nếu là câu nối:
+                Cặp 1: <item 1> - <matching item 1>
+                Cặp 2: <item 2> - <matching item 2>
+                Cặp 3: <item 3> - <matching item 3>
+                Cặp 4: <item 4> - <matching item 4>
+                
+                Nếu là sắp xếp thứ tự:
+                Bước 1: <step 1>
+                Bước 2: <step 2>
+                Bước 3: <step 3>
+                Bước 4: <step 4>
+                
                 Lý do: <lý do đáp án đúng>
                 ---`,
               },
@@ -651,5 +870,155 @@ async function addNewQuestion() {
   } catch (error) {
     console.error("Lỗi khi thêm câu hỏi:", error);
     alert("Không thể thêm câu hỏi. Vui lòng thử lại!");
+  }
+}
+
+// Matching question handlers
+function initMatchingHandlers() {
+  const matchingItems = document.querySelectorAll('.matching-item');
+  matchingItems.forEach(item => {
+    item.addEventListener('click', handleMatchingItemClick);
+  });
+}
+
+function handleMatchingItemClick(event) {
+  const item = event.target;
+  const container = item.closest('.matching-container');
+  
+  if (!selectedMatchingItem) {
+    // First selection
+    selectedMatchingItem = item;
+    item.classList.add('selected');
+  } else {
+    // Second selection
+    const firstItem = selectedMatchingItem;
+    const secondItem = item;
+    
+    // Check if items are in different columns
+    if (firstItem.closest('.matching-column') !== secondItem.closest('.matching-column')) {
+      // Check if the match is correct
+      const firstIndex = firstItem.dataset.index;
+      const secondIndex = secondItem.dataset.index;
+      const currentQuestion = questions[currentQuestionIndex];
+      const isCorrect = currentQuestion.matchingPairs[firstIndex].right === currentQuestion.matchingPairs[secondIndex].right;
+      
+      if (isCorrect) {
+        firstItem.classList.add('correct');
+        secondItem.classList.add('correct');
+        firstItem.classList.remove('selected');
+        secondItem.classList.remove('selected');
+        
+        // Update user answer
+        const userAnswer = userAnswers[currentQuestionIndex] || [];
+        userAnswer.push(`${firstIndex}-${secondIndex}`);
+        userAnswers[currentQuestionIndex] = userAnswer;
+        
+        // Check if all pairs are matched
+        if (userAnswer.length === currentQuestion.matchingPairs.length) {
+          currentScore++;
+          document.getElementById("current-score").textContent = currentScore;
+          changeBackgroundColor(true);
+          createFireworks();
+          updateNavigationButtons();
+        }
+      } else {
+        firstItem.classList.add('incorrect');
+        secondItem.classList.add('incorrect');
+        setTimeout(() => {
+          firstItem.classList.remove('incorrect', 'selected');
+          secondItem.classList.remove('incorrect', 'selected');
+        }, 1000);
+      }
+    }
+    
+    selectedMatchingItem = null;
+  }
+}
+
+// Ordering question handlers
+function initOrderingHandlers() {
+  const container = document.querySelector('.ordering-container');
+  if (!container) return;
+  
+  const items = container.querySelectorAll('.ordering-item');
+  items.forEach(item => {
+    item.addEventListener('dragstart', handleDragStart);
+    item.addEventListener('dragend', handleDragEnd);
+  });
+  
+  container.addEventListener('dragover', handleDragOver);
+  container.addEventListener('drop', handleDrop);
+}
+
+let draggedItem = null;
+
+function handleDragStart(e) {
+  draggedItem = this;
+  this.classList.add('dragging');
+}
+
+function handleDragEnd(e) {
+  this.classList.remove('dragging');
+  draggedItem = null;
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  const container = this;
+  const afterElement = getDragAfterElement(container, e.clientY);
+  const draggable = document.querySelector('.dragging');
+  
+  if (afterElement) {
+    container.insertBefore(draggable, afterElement);
+  } else {
+    container.appendChild(draggable);
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  updateOrderingAnswer();
+}
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.ordering-item:not(.dragging)')];
+  
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function updateOrderingAnswer() {
+  const container = document.querySelector('.ordering-container');
+  const items = container.querySelectorAll('.ordering-item');
+  const currentQuestion = questions[currentQuestionIndex];
+  
+  const userOrder = Array.from(items).map(item => {
+    const index = item.dataset.index;
+    return currentQuestion.orderingSteps[index];
+  }).join(',');
+  
+  userAnswers[currentQuestionIndex] = userOrder;
+  
+  // Check if order is correct
+  if (userOrder === currentQuestion.correctAnswer) {
+    currentScore++;
+    document.getElementById("current-score").textContent = currentScore;
+    changeBackgroundColor(true);
+    createFireworks();
+    updateNavigationButtons();
+    
+    // Disable dragging after correct answer
+    items.forEach(item => {
+      item.draggable = false;
+      item.classList.add('correct');
+    });
   }
 }
