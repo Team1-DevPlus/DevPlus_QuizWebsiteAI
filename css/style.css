@@ -468,3 +468,23 @@ button:hover {
 .preview-actions button:hover {
   background-color: #45a049; 
 }
+
+.preview-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.preview-answer {
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.preview-answer:hover {
+  background-color: #f0f7ff;
+  transform: translateX(5px);
+}

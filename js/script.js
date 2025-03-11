@@ -771,9 +771,9 @@ function showPreview() {
     const questionHtml = `
       <div class="preview-question">
         <h3>${index + 1}. ${q.question}</h3>
-        <ul>
-          ${q.choices.map((choice, i) => `<li>${choice}</li>`).join("")}
-        </ul>
+        <div class="preview-answers">
+          ${q.choices.map((choice) => `<div class="preview-answer">${choice}</div>`).join("")}
+        </div>
         <div class="question-actions">
           <button onclick="deleteQuestion(${index})">🗑 Xóa</button>
           <button onclick="replaceQuestion(${index})">🔄 Thay thế</button>
