@@ -1,21 +1,19 @@
 // Global variables to store quiz state
-let questions = [];
-let currentQuestionIndex = 0;
-let userAnswers = [];
-let currentScore = 0;
+let questions = []
+let currentQuestionIndex = 0
+let userAnswers = []
+let currentScore = 0
 
 async function generateQuestions() {
   const topic = document.getElementById("topic").value;
-  const count = Number.parseInt(
-    document.getElementById("question-count").value
-  );
+  const count = Number.parseInt(document.getElementById("question-count").value);
 
   if (!topic || isNaN(count) || count < 1 || count > 10) {
     alert("Vui lòng nhập chủ đề và số câu hỏi hợp lệ (1-10)!");
     return;
   }
 
-  // Hiển thị loading
+  // hiển thị loading
   document.getElementById("loading").classList.remove("hidden");
 
   const apiUrl =
@@ -51,38 +49,10 @@ async function generateQuestions() {
 
     const data = await response.json();
     const content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const questionBlocks = content
-      .split("---")
-      .map((q) => q.trim())
-      .filter(Boolean);
-
+    const questionBlocks = content.split("---").map((q) => q.trim()).filter(Boolean);
+    
     questions = questionBlocks.map(parseQuestion).filter(Boolean);
   } catch (error) {
     console.error("Lỗi khi gọi API:", error);
   }
-
-  // Ẩn loading
-  document.getElementById("loading").classList.add("hidden");
-
-  if (questions.length === 0) {
-    alert("Không thể tạo câu hỏi. Vui lòng thử lại!");
-    return;
-  }
-
-  // Khởi tạo quiz
-  currentQuestionIndex = 0;
-  userAnswers = Array(questions.length).fill(null);
-  currentScore = 0;
-
-  document.getElementById("setup-section").classList.add("hidden");
-  document.getElementById("quiz-section").classList.remove("hidden");
-  document.getElementById("total-questions").textContent = questions.length;
-  document.getElementById("max-score").textContent = questions.length;
-  document.getElementById("current-score").textContent = "0";
-
-  // Reset background color
-  resetBackgroundColor();
-
-  displayCurrentQuestion();
-  updateNavigationButtons();
 }
