@@ -633,7 +633,7 @@ async function finishQuiz() {
     const resultClass = isCorrect ? "correct-answer" : "incorrect-answer";
 
     const questionHtml = `
-<div class="result-question p-4  rounded-lg shadow-lg border mb-4">
+<div class="result-question p-4 bg-white/30 rounded-lg shadow-lg border mb-4">
   <h4 class="text-lg font-semibold text-gray-900 mb-2">
     ${index + 1}. ${question.question}
   </h4>

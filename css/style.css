@@ -356,13 +356,8 @@ input:focus {
   border-bottom: 1px solid #ddd;
   padding: 15px 0;
   text-align: left;
-  transition: all 0.3s ease;
 }
 
-.result-question:hover {
-  background-color: #f9fafb;
-  padding-left: 10px;
-}
 
 .correct-answer {
   color: green;
@@ -450,7 +445,7 @@ button:hover {
 
 .preview-actions {
   display: flex;
-  gap: 10px; 
+  gap: 10px;
   margin-top: 20px;
 }
 
@@ -460,11 +455,11 @@ button:hover {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #4CAF50; 
-  color: white; 
+  background-color: #4CAF50;
+  color: white;
   transition: background-color 0.3s ease;
 }
 
 .preview-actions button:hover {
-  background-color: #45a049; 
+  background-color: #45a049;
 }
