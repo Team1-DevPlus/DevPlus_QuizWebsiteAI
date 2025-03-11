@@ -1,59 +1,59 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trắc nghiệm AI</title>
+    <title>AI Quiz</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div class="container">
       <div class="quiz-card">
-        <h1 class="title">Trắc nghiệm AI</h1>
+        <h1 class="title">AI Quiz</h1>
 
         <!-- Setup Section -->
         <div id="setup-section" class="section">
           <div class="form-group">
-            <input type="text" id="topic" placeholder="Nhập chủ đề..." />
+            <input type="text" id="topic" placeholder="Enter topic..." />
             <input
               type="number"
               id="question-count"
-              placeholder="Số câu hỏi"
+              placeholder="Number of questions"
               min="1"
               max="10"
             />
           </div>
           <button onclick="generateQuestions()" class="btn btn-primary">
-            Tạo câu hỏi
+            Generate Questions
           </button>
           <div id="loading" class="loading hidden">
             <div class="spinner"></div>
-            <p>Đang tạo câu hỏi...</p>
+            <p>Generating questions...</p>
           </div>
           <div class="history-link">
-            <a href="history.html">Xem lịch sử bài kiểm tra</a>
+            <a href="./components/history/history.html">View Quiz History</a>
           </div>
         </div>
 
         <!-- Preview Section -->
         <div id="preview-section" class="hidden">
-          <h2>Xem trước câu hỏi</h2>
+          <h2>Preview Questions</h2>
           <div id="preview-container"></div>
-          <button onclick="startQuiz()">🎯 Bắt đầu làm bài</button>
-          <button onclick="addNewQuestion()">➕ Thêm câu hỏi</button>
+          <button onclick="startQuiz()">🎯 Start Quiz</button>
+          <button onclick="addNewQuestion()">➕ Add Question</button>
         </div>
 
         <!-- Quiz Section -->
         <div id="quiz-section" class="section hidden">
           <div class="quiz-header">
             <div class="quiz-progress">
-              Câu hỏi <span id="current-question">1</span>/<span
+              Question <span id="current-question">1</span>/<span
                 id="total-questions"
                 >5</span
               >
             </div>
             <div class="quiz-score">
-              Điểm: <span id="current-score">0</span>/<span id="max-score"
+              Score: <span id="current-score">0</span>/<span id="max-score"
                 >0</span
               >
             </div>
@@ -67,41 +67,47 @@
               onclick="previousQuestion()"
               class="btn btn-secondary hidden"
             >
-              Câu trước
+              Previous Question
             </button>
             <button
               id="next-btn"
               onclick="nextQuestion()"
               class="btn btn-primary hidden"
             >
-              Câu tiếp theo
+              Next Question
             </button>
             <button
               id="finish-btn"
               onclick="finishQuiz()"
               class="btn btn-success hidden"
             >
-              Hoàn thành
+              Finish
             </button>
           </div>
         </div>
 
         <!-- Results Section -->
         <div id="results-section" class="section hidden">
-          <h2>Kết quả</h2>
+          <h2>Results</h2>
           <div class="final-score">
             <span id="final-score">0</span>/<span id="final-max-score">0</span>
           </div>
           <div id="detailed-results"></div>
-          <p id="result-message">Chúc mừng! Bạn đã hoàn thành bài kiểm tra.</p>
-          <button onclick="resetQuiz()" class="btn btn-primary">Làm lại</button>
+          <p id="result-message">
+            Congratulations! You have completed the quiz.
+          </p>
+          <button onclick="tryAgain()" class="btn btn-primary">
+            Try Again
+          <button onclick="resetQuiz()" class="btn btn-primary">
+            Back Home
+          </button>
         </div>
       </div>
     </div>
-    <!-- Anh em thêm script ở đây nhé, đã thêm sẵn cần thêm gì cứ ghi nhứ bên dưới -->
+    <!-- Add scripts here -->
     <script src="./components/history/db.js" defer></script>
     <script src="./components/home/home.js" defer></script>
     <script src="./components/quiz/quiz.js" defer></script>
-    <script src="js/script.js" defer></script>
+    <!-- <script src="js/script.js" defer></script> -->
   </body>
 </html>

@@ -225,7 +225,7 @@ function addQuizActionListeners() {
   document.querySelectorAll(".resume-quiz").forEach((button) => {
     button.addEventListener("click", async (event) => {
       const quizId = Number.parseInt(event.target.dataset.id);
-      window.location.href = `index.html?id=${quizId}`;
+      window.location.href = `../../index.html?id=${quizId}`;
     });
   });
 
@@ -250,7 +250,7 @@ function addQuizActionListeners() {
         };
 
         const newQuizId = await window.quizDB.saveQuiz(newQuiz);
-        window.location.href = `index.html?id=${newQuizId}`;
+        window.location.href = `../../index.html?id=${newQuizId}`;
       } catch (error) {
         console.error("Failed to retake quiz:", error);
         showErrorMessage("Failed to retake quiz. Please try again.");
@@ -387,5 +387,5 @@ function showErrorMessage(message) {
 
 // Add event listener for new quiz button
 document.getElementById("new-quiz-btn")?.addEventListener("click", () => {
-  window.location.href = "index.html";
+  window.location.href = "../../index.html";
 });

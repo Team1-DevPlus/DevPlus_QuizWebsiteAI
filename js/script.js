@@ -779,8 +779,8 @@ function showPreview() {
   });
 
   const addQuestionButton = document.querySelector(
-    "#preview-section button[onclick='addNewQuestion()']"
-  );
+    "#preview-section button[onclick='addNewQuestion()']",
+  )
   if (questions.length >= maxQuestions) {
     addQuestionButton.style.display = "none";
   } else {

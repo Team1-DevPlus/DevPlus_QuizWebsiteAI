@@ -1,911 +1,319 @@
-//Đag ở bản gốc chưa link gì cả, ae chỉnh sửa xong link vào script ở index.html
-let currentQuestionIndex = 0;
-let userAnswers = [];
-let currentScore = 0;
-let isCorrect = null;
+// Quiz module for handling quiz functionality
+window.quizModule = (() => {
+  // Private variables
+  let questions = []
+  let currentQuestionIndex = 0
+  let userAnswers = []
+  let currentScore = 0
 
-const resultSection = document.getElementById("result-section");
-
-document.addEventListener("DOMContentLoaded", () => {
-  const questions = JSON.parse(localStorage.getItem("questions"));
-  const userAnswers = JSON.parse(localStorage.getItem("userAnswers"));
-  //DOM
-  const quizSection = document.getElementById("quiz-section");
-  const questionContainer = document.getElementById("question-container");
-  const totalQuestionsEl = document.getElementById("total-questions");
-  const currentScoreEl = document.getElementById("current-score");
-  const maxScoreEl = document.getElementById("max-score");
-  const prevButton = document.getElementById("prev-button");
-  const nextButton = document.getElementById("next-button");
-  const finishButton = document.getElementById("finish-button");
-  const finalScoreEl = document.getElementById("final-score");
-  const finalMaxScoreEl = document.getElementById("final-max-score");
-  const resultMessageEl = document.getElementById("result-message");
-  const detailedResultsEl = document.getElementById("detailed-results");
-  // Event Listeners
-  prevButton.addEventListener("click", previousQuestion);
-  nextButton.addEventListener("click", nextQuestion);
-  finishButton.addEventListener("click", finishQuiz);
-
-  // Initialize quiz UI
-  totalQuestionsEl.textContent = questions.length;
-  maxScoreEl.textContent = questions.length;
-  currentScoreEl.textContent = currentScore;
-
-  displayCurrentQuestion();
-  updateNavigationButtons();
-  // Hàm hiển thị câu hỏi hiện tại
-  function displayCurrentQuestion() {
-    const currentQuestion = questions[currentQuestionIndex];
-    if (!currentQuestion) return;
-
-    questionContainer.innerHTML = `
-        <p><strong>Câu ${currentQuestionIndex + 1}:</strong> ${
-      currentQuestion.question
-    }</p>
-        <ul>
-            ${currentQuestion.choices
-              .map((choice) => `<li>${choice}</li>`)
-              .join("")}
-        </ul>
-    `;
-
-    const userAnswer = userAnswers[currentQuestionIndex];
-    const showFeedback = userAnswer !== null;
-
-    let questionHtml = `
-    <h3 class="text-white font-medium mb-4">${currentQuestionIndex + 1}. ${
-      currentQuestion.question
-    }</h3>
-    <div class="space-y-2">
-  `;
-
-    if (currentQuestion.type === "single") {
-      // Single choice question
-      currentQuestion.choices.forEach((choice) => {
-        const optionLetter = choice[0]; // A, B, C, or D
-        const isSelected = userAnswer === optionLetter;
-        const isCorrect = currentQuestion.correctAnswer === optionLetter;
-
-        let optionClass =
-          "flex items-center p-6 rounded-md cursor-pointer transition-all";
-
-        if (showFeedback) {
-          if (isSelected && isCorrect) {
-            optionClass += " answer-option correct disabled";
-          } else if (isSelected && !isCorrect) {
-            optionClass += " answer-option incorrect disabled";
-          } else if (isCorrect) {
-            optionClass += " answer-option correct disabled";
-          } else {
-            optionClass +=
-              " answer-option disabled bg-white/10 border-2 border-transparent";
-          }
-        } else {
-          optionClass += isSelected
-            ? " answer-option selected bg-blue-500/50 border-2 border-blue-400"
-            : " answer-option bg-white/10 hover:bg-white/20 border-2 border-transparent";
-        }
-
-        questionHtml += `
-        <div class="${optionClass}" data-option="${optionLetter}" data-type="single">
-          <input
-            type="radio"
-            name="question-${currentQuestionIndex}"
-            class="mr-3 accent-yellow-400 w-4 h-4"
-            ${isSelected ? "checked" : ""}
-            ${showFeedback ? "disabled" : ""}
-          >
-          <span class="text-white">${choice}</span>
-
-          ${
-            showFeedback
-              ? `
-            <span class="ml-auto">
-              ${isSelected && isCorrect ? "✓" : ""}
-              ${isSelected && !isCorrect ? "✗" : ""}
-              ${!isSelected && isCorrect ? "✓" : ""}
-            </span>
-          `
-              : ""
-          }
-        </div>
-      `;
-      });
-
-      if (showFeedback) {
-        questionHtml += `
-        <div class="mt-4 p-3 bg-white/10 rounded-md">
-          <p class="text-white font-bold">Giải thích:</p>
-          <p class="text-white">${currentQuestion.reason}</p>
-        </div>
-      `;
-      }
-    } else if (currentQuestion.type === "multiple") {
-      // Multiple choice question
-      const correctAnswers = currentQuestion.correctAnswer
-        .split(",")
-        .map((a) => a.trim());
-
-      currentQuestion.choices.forEach((choice) => {
-        const optionLetter = choice[0]; // A, B, C, or D
-        const isSelected = Array.isArray(userAnswer)
-          ? userAnswer.includes(optionLetter)
-          : false;
-        const isCorrect = correctAnswers.includes(optionLetter);
-
-        let optionClass =
-          "flex items-center p-3 rounded-md cursor-pointer transition-all";
-
-        if (showFeedback) {
-          if (isSelected && isCorrect) {
-            optionClass += " answer-option correct disabled";
-          } else if (isSelected && !isCorrect) {
-            optionClass += " answer-option incorrect disabled";
-          } else if (isCorrect) {
-            optionClass += " answer-option correct disabled";
-          } else {
-            optionClass +=
-              " answer-option disabled bg-white/10 border-2 border-transparent";
-          }
-        } else {
-          optionClass += isSelected
-            ? " answer-option selected bg-blue-500/50 border-2 border-blue-400"
-            : " answer-option bg-white/10 hover:bg-white/20 border-2 border-transparent";
-        }
-
-        questionHtml += `
-        <div class="${optionClass}" data-option="${optionLetter}" data-type="multiple">
-          <input
-            type="checkbox"
-            name="question-${currentQuestionIndex}"
-            class="mr-3 accent-yellow-400 w-4 h-4"
-            ${isSelected ? "checked" : ""}
-            ${showFeedback ? "disabled" : ""}
-          >
-          <span class="text-white">${choice}</span>
-
-          ${
-            showFeedback
-              ? `
-            <span class="ml-auto">
-              ${isSelected && isCorrect ? "✓" : ""}
-              ${isSelected && !isCorrect ? "✗" : ""}
-              ${!isSelected && isCorrect ? "✓" : ""}
-            </span>
-          `
-              : ""
-          }
-        </div>
-      `;
-      });
-
-      if (!showFeedback) {
-        questionHtml += `
-        <button
-          id="submit-multiple"
-          class="w-full mt-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-arcade rounded-md border-b-4 border-blue-700 transition-all transform hover:scale-102 active:scale-98 active:translate-y-1"
-        >
-          SUBMIT ANSWER
-        </button>
-      `;
-      }
-
-      if (showFeedback) {
-        questionHtml += `
-        <div class="mt-4 p-3 bg-white/10 rounded-md">
-          <p class="text-white font-bold">Giải thích:</p>
-          <p class="text-white">${currentQuestion.reason}</p>
-        </div>
-      `;
-      }
-    } else if (currentQuestion.type === "text") {
-      // Text answer question
-      let textareaClass =
-        "w-full p-3 rounded-md bg-white/10 text-white border-2";
-
-      if (showFeedback) {
-        // Check for approximate match
-        const userAnswerLower = String(userAnswer).toLowerCase().trim();
-        const correctAnswerLower = currentQuestion.correctAnswer
-          .toLowerCase()
-          .trim();
-
-        const isCorrect =
-          userAnswerLower === correctAnswerLower ||
-          correctAnswerLower.includes(userAnswerLower) ||
-          userAnswerLower.includes(correctAnswerLower);
-
-        textareaClass += isCorrect ? " border-green-400" : " border-red-400";
-      } else {
-        textareaClass += " border-blue-400";
-      }
-
-      questionHtml += `
-      <textarea
-        id="text-answer"
-        class="${textareaClass}"
-        rows="4"
-        placeholder="Nhập câu trả lời của bạn..."
-        ${showFeedback ? `value="${userAnswer}" disabled` : ""}
-      ></textarea>
-
-      ${
-        !showFeedback
-          ? `
-        <button
-          id="submit-text"
-          class="w-full mt-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-arcade rounded-md border-b-4 border-blue-700 transition-all transform hover:scale-102 active:scale-98 active:translate-y-1"
-        >
-          SUBMIT ANSWER
-        </button>
-      `
-          : ""
-      }
-
-      ${
-        showFeedback
-          ? `
-        <div class="mt-4 p-3 bg-white/10 rounded-md">
-          <p class="text-white font-bold">Đáp án mẫu:</p>
-          <p class="text-white">${currentQuestion.correctAnswer}</p>
-          <p class="text-white font-bold mt-2">Giải thích:</p>
-          <p class="text-white">${currentQuestion.reason}</p>
-        </div>
-      `
-          : ""
-      }
-    `;
-    }
-
-    questionHtml += `
-    </div>
-  `;
-
-    questionContainer.innerHTML = questionHtml;
-
-    // Add event listeners to answer options
-    const answerOptions = document.querySelectorAll(".answer-option");
-    answerOptions.forEach((option) => {
-      if (!option.classList.contains("disabled")) {
-        option.addEventListener("click", handleAnswerSelection);
-      }
-    });
-
-    // Add event listeners to submit buttons
-    const submitMultipleBtn = document.getElementById("submit-multiple");
-    if (submitMultipleBtn) {
-      submitMultipleBtn.addEventListener("click", submitMultipleChoiceAnswer);
-    }
-
-    const submitTextBtn = document.getElementById("submit-text");
-    if (submitTextBtn) {
-      submitTextBtn.addEventListener("click", submitTextAnswer);
-    }
-
-    // Apply correct/incorrect background if needed
-    if (isCorrect === true) {
-      questionContainer.classList.add("correct-bg");
-      questionContainer.classList.remove("incorrect-bg");
-    } else if (isCorrect === false) {
-      questionContainer.classList.add("incorrect-bg");
-      questionContainer.classList.remove("correct-bg");
-    } else {
-      questionContainer.classList.remove("correct-bg", "incorrect-bg");
-    }
+  // Initialize quiz with provided data
+  function initQuiz(quizQuestions, answers, questionIndex, score) {
+    questions = quizQuestions
+    userAnswers = answers || Array(questions.length).fill(null)
+    currentQuestionIndex = questionIndex || 0
+    currentScore = score || 0
   }
+
+  // Reset quiz state
+  function resetQuizState() {
+    questions = []
+    currentQuestionIndex = 0
+    userAnswers = []
+    currentScore = 0
+  }
+
+  // Display current question
   function displayCurrentQuestion() {
-    const currentQuestion = questions[currentQuestionIndex];
-    if (!currentQuestion) return;
+    const container = document.getElementById("question-container")
+    const currentQuestion = questions[currentQuestionIndex]
 
-    questionContainer.innerHTML = `
-        <p><strong>Câu ${currentQuestionIndex + 1}:</strong> ${
-      currentQuestion.question
-    }</p>
-        <ul>
-            ${currentQuestion.choices
-              .map((choice) => `<li>${choice}</li>`)
-              .join("")}
-        </ul>
-    `;
+    if (!currentQuestion) return
 
-    const userAnswer = userAnswers[currentQuestionIndex];
-    const showFeedback = userAnswer !== null;
+    document.getElementById("current-question").textContent = currentQuestionIndex + 1
+
+    const userAnswer = userAnswers[currentQuestionIndex]
+    const showFeedback = userAnswer !== null
 
     let questionHtml = `
-    <h3 class="text-white font-medium mb-4">${currentQuestionIndex + 1}. ${
-      currentQuestion.question
-    }</h3>
-    <div class="space-y-2">
-  `;
+          <div class="question-block">
+              <h3>${currentQuestionIndex + 1}. ${currentQuestion.question}</h3>
+              <div class="answer-options">
+      `
 
-    if (currentQuestion.type === "single") {
-      // Single choice question
-      currentQuestion.choices.forEach((choice) => {
-        const optionLetter = choice[0]; // A, B, C, or D
-        const isSelected = userAnswer === optionLetter;
-        const isCorrect = currentQuestion.correctAnswer === optionLetter;
+    currentQuestion.choices.forEach((choice, index) => {
+      const optionLetter = choice[0] // A, B, C, or D
+      const isSelected = userAnswer === optionLetter
+      const isCorrect = currentQuestion.correctAnswer === optionLetter
 
-        let optionClass =
-          "flex items-center p-6 rounded-md cursor-pointer transition-all";
+      let optionClass = "answer-option"
+      let feedbackIcon = ""
 
-        if (showFeedback) {
-          if (isSelected && isCorrect) {
-            optionClass += " answer-option correct disabled";
-          } else if (isSelected && !isCorrect) {
-            optionClass += " answer-option incorrect disabled";
-          } else if (isCorrect) {
-            optionClass += " answer-option correct disabled";
-          } else {
-            optionClass +=
-              " answer-option disabled bg-white/10 border-2 border-transparent";
-          }
-        } else {
-          optionClass += isSelected
-            ? " answer-option selected bg-blue-500/50 border-2 border-blue-400"
-            : " answer-option bg-white/10 hover:bg-white/20 border-2 border-transparent";
+      if (showFeedback) {
+        if (isSelected) {
+          optionClass += isCorrect ? " correct" : " incorrect"
+          feedbackIcon = isCorrect ? '<span class="feedback-icon">✓</span>' : '<span class="feedback-icon">✗</span>'
+        } else if (isCorrect) {
+          optionClass += " correct"
+          feedbackIcon = '<span class="feedback-icon">✓</span>'
         }
-
-        questionHtml += `
-        <div class="${optionClass}" data-option="${optionLetter}" data-type="single">
-          <input
-            type="radio"
-            name="question-${currentQuestionIndex}"
-            class="mr-3 accent-yellow-400 w-4 h-4"
-            ${isSelected ? "checked" : ""}
-            ${showFeedback ? "disabled" : ""}
-          >
-          <span class="text-white">${choice}</span>
-
-          ${
-            showFeedback
-              ? `
-            <span class="ml-auto">
-              ${isSelected && isCorrect ? "✓" : ""}
-              ${isSelected && !isCorrect ? "✗" : ""}
-              ${!isSelected && isCorrect ? "✓" : ""}
-            </span>
-          `
-              : ""
-          }
-        </div>
-      `;
-      });
-
-      if (showFeedback) {
-        questionHtml += `
-        <div class="mt-4 p-3 bg-white/10 rounded-md">
-          <p class="text-white font-bold">Giải thích:</p>
-          <p class="text-white">${currentQuestion.reason}</p>
-        </div>
-      `;
-      }
-    } else if (currentQuestion.type === "multiple") {
-      // Multiple choice question
-      const correctAnswers = currentQuestion.correctAnswer
-        .split(",")
-        .map((a) => a.trim());
-
-      currentQuestion.choices.forEach((choice) => {
-        const optionLetter = choice[0]; // A, B, C, or D
-        const isSelected = Array.isArray(userAnswer)
-          ? userAnswer.includes(optionLetter)
-          : false;
-        const isCorrect = correctAnswers.includes(optionLetter);
-
-        let optionClass =
-          "flex items-center p-3 rounded-md cursor-pointer transition-all";
-
-        if (showFeedback) {
-          if (isSelected && isCorrect) {
-            optionClass += " answer-option correct disabled";
-          } else if (isSelected && !isCorrect) {
-            optionClass += " answer-option incorrect disabled";
-          } else if (isCorrect) {
-            optionClass += " answer-option correct disabled";
-          } else {
-            optionClass +=
-              " answer-option disabled bg-white/10 border-2 border-transparent";
-          }
-        } else {
-          optionClass += isSelected
-            ? " answer-option selected bg-blue-500/50 border-2 border-blue-400"
-            : " answer-option bg-white/10 hover:bg-white/20 border-2 border-transparent";
-        }
-
-        questionHtml += `
-        <div class="${optionClass}" data-option="${optionLetter}" data-type="multiple">
-          <input
-            type="checkbox"
-            name="question-${currentQuestionIndex}"
-            class="mr-3 accent-yellow-400 w-4 h-4"
-            ${isSelected ? "checked" : ""}
-            ${showFeedback ? "disabled" : ""}
-          >
-          <span class="text-white">${choice}</span>
-
-          ${
-            showFeedback
-              ? `
-            <span class="ml-auto">
-              ${isSelected && isCorrect ? "✓" : ""}
-              ${isSelected && !isCorrect ? "✗" : ""}
-              ${!isSelected && isCorrect ? "✓" : ""}
-            </span>
-          `
-              : ""
-          }
-        </div>
-      `;
-      });
-
-      if (!showFeedback) {
-        questionHtml += `
-        <button
-          id="submit-multiple"
-          class="w-full mt-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-arcade rounded-md border-b-4 border-blue-700 transition-all transform hover:scale-102 active:scale-98 active:translate-y-1"
-        >
-          SUBMIT ANSWER
-        </button>
-      `;
-      }
-
-      if (showFeedback) {
-        questionHtml += `
-        <div class="mt-4 p-3 bg-white/10 rounded-md">
-          <p class="text-white font-bold">Giải thích:</p>
-          <p class="text-white">${currentQuestion.reason}</p>
-        </div>
-      `;
-      }
-    } else if (currentQuestion.type === "text") {
-      // Text answer question
-      let textareaClass =
-        "w-full p-3 rounded-md bg-white/10 text-white border-2";
-
-      if (showFeedback) {
-        // Check for approximate match
-        const userAnswerLower = String(userAnswer).toLowerCase().trim();
-        const correctAnswerLower = currentQuestion.correctAnswer
-          .toLowerCase()
-          .trim();
-
-        const isCorrect =
-          userAnswerLower === correctAnswerLower ||
-          correctAnswerLower.includes(userAnswerLower) ||
-          userAnswerLower.includes(correctAnswerLower);
-
-        textareaClass += isCorrect ? " border-green-400" : " border-red-400";
-      } else {
-        textareaClass += " border-blue-400";
+      } else if (isSelected) {
+        optionClass += " selected"
       }
 
       questionHtml += `
-      <textarea
-        id="text-answer"
-        class="${textareaClass}"
-        rows="4"
-        placeholder="Nhập câu trả lời của bạn..."
-        ${showFeedback ? `value="${userAnswer}" disabled` : ""}
-      ></textarea>
-
-      ${
-        !showFeedback
-          ? `
-        <button
-          id="submit-text"
-          class="w-full mt-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-arcade rounded-md border-b-4 border-blue-700 transition-all transform hover:scale-102 active:scale-98 active:translate-y-1"
-        >
-          SUBMIT ANSWER
-        </button>
-      `
-          : ""
-      }
-
-      ${
-        showFeedback
-          ? `
-        <div class="mt-4 p-3 bg-white/10 rounded-md">
-          <p class="text-white font-bold">Đáp án mẫu:</p>
-          <p class="text-white">${currentQuestion.correctAnswer}</p>
-          <p class="text-white font-bold mt-2">Giải thích:</p>
-          <p class="text-white">${currentQuestion.reason}</p>
-        </div>
-      `
-          : ""
-      }
-    `;
-    }
+              <div class="${optionClass}" onclick="window.quizModule.selectAnswer('${optionLetter}')">
+                  <input type="radio" name="q${currentQuestionIndex}" value="${optionLetter}" ${
+                    isSelected ? "checked" : ""
+                  } ${showFeedback ? "disabled" : ""}>
+                  <span>${choice}</span>
+                  ${feedbackIcon}
+              </div>
+          `
+    })
 
     questionHtml += `
-    </div>
-  `;
+              </div>
+          </div>
+      `
 
-    questionContainer.innerHTML = questionHtml;
-
-    // Add event listeners to answer options
-    const answerOptions = document.querySelectorAll(".answer-option");
-    answerOptions.forEach((option) => {
-      if (!option.classList.contains("disabled")) {
-        option.addEventListener("click", handleAnswerSelection);
-      }
-    });
-
-    // Add event listeners to submit buttons
-    const submitMultipleBtn = document.getElementById("submit-multiple");
-    if (submitMultipleBtn) {
-      submitMultipleBtn.addEventListener("click", submitMultipleChoiceAnswer);
-    }
-
-    const submitTextBtn = document.getElementById("submit-text");
-    if (submitTextBtn) {
-      submitTextBtn.addEventListener("click", submitTextAnswer);
-    }
-
-    // Apply correct/incorrect background if needed
-    if (isCorrect === true) {
-      questionContainer.classList.add("correct-bg");
-      questionContainer.classList.remove("incorrect-bg");
-    } else if (isCorrect === false) {
-      questionContainer.classList.add("incorrect-bg");
-      questionContainer.classList.remove("correct-bg");
-    } else {
-      questionContainer.classList.remove("correct-bg", "incorrect-bg");
-    }
+    container.innerHTML = questionHtml
   }
 
   // Handle answer selection
-  function handleAnswerSelection(e) {
-    const option = e.currentTarget;
-    const optionLetter = option.dataset.option;
-    const type = option.dataset.type;
-
-    if (type === "single") {
-      handleSingleChoiceSelect(optionLetter);
-    } else if (type === "multiple") {
-      handleMultipleChoiceSelect(option);
-    }
-  }
-
-  // Handle single choice selection
-  function handleSingleChoiceSelect(optionLetter) {
+  async function selectAnswer(answer) {
     // If already answered, don't allow changing
-    if (userAnswers[currentQuestionIndex] !== null) return;
+    if (userAnswers[currentQuestionIndex] !== null) return
 
-    userAnswers[currentQuestionIndex] = optionLetter;
+    userAnswers[currentQuestionIndex] = answer
 
     // Check if answer is correct
-    const currentQuestion = questions[currentQuestionIndex];
-    const isAnswerCorrect = optionLetter === currentQuestion.correctAnswer;
+    const currentQuestion = questions[currentQuestionIndex]
+    const isCorrect = answer === currentQuestion.correctAnswer
 
-    if (isAnswerCorrect) {
-      currentScore++;
-      currentScoreEl.textContent = currentScore;
-      isCorrect = true;
+    if (isCorrect) {
+      currentScore++
+      document.getElementById("current-score").textContent = currentScore
+
+      // Add green background effect when correct
+      changeBackgroundColor(true)
+
+      // Fireworks effect when correct
+      createFireworks()
     } else {
-      isCorrect = false;
+      // Add red background effect when incorrect
+      changeBackgroundColor(false)
     }
 
     // Show feedback
-    displayCurrentQuestion();
+    displayCurrentQuestion()
 
     // Enable navigation to next question
-    nextButton.disabled = false;
-    nextButton.classList.remove("opacity-50", "cursor-not-allowed");
-
-    // Reset the correct/incorrect state after a delay
-    setTimeout(() => {
-      isCorrect = null;
-      displayCurrentQuestion();
-    }, 1500);
-
-    updateNavigationButtons();
-  }
-
-  // Handle multiple choice selection
-  function handleMultipleChoiceSelect(option) {
-    // If already answered, don't allow changing
-    if (userAnswers[currentQuestionIndex] !== null) return;
-
-    const optionLetter = option.dataset.option;
-    const checkbox = option.querySelector('input[type="checkbox"]');
-
-    // Toggle checkbox
-    checkbox.checked = !checkbox.checked;
-
-    // Toggle selected class
-    if (checkbox.checked) {
-      option.classList.add("selected");
-    } else {
-      option.classList.remove("selected");
-    }
-  }
-
-  // Submit multiple choice answer
-  function submitMultipleChoiceAnswer() {
-    const selectedOptions = [];
-    const checkboxes = document.querySelectorAll(
-      'input[type="checkbox"]:checked'
-    );
-
-    checkboxes.forEach((checkbox) => {
-      const option = checkbox.closest(".answer-option");
-      if (option) {
-        selectedOptions.push(option.dataset.option);
-      }
-    });
-
-    if (selectedOptions.length === 0) return;
-
-    userAnswers[currentQuestionIndex] = selectedOptions;
-
-    // Check if answer is correct
-    const currentQuestion = questions[currentQuestionIndex];
-    const correctAnswers = currentQuestion.correctAnswer
-      .split(",")
-      .map((a) => a.trim());
-
-    // Check if all selected answers are correct and all correct answers are selected
-    const allCorrectSelected = correctAnswers.every((a) =>
-      selectedOptions.includes(a)
-    );
-    const noIncorrectSelected = selectedOptions.every((a) =>
-      correctAnswers.includes(a)
-    );
-    const isAnswerCorrect = allCorrectSelected && noIncorrectSelected;
-
-    if (isAnswerCorrect) {
-      currentScore++;
-      currentScoreEl.textContent = currentScore;
-      isCorrect = true;
-    } else {
-      isCorrect = false;
-    }
-
-    // Show feedback
-    displayCurrentQuestion();
-
-    // Enable navigation to next question
-    nextButton.disabled = false;
-    nextButton.classList.remove("opacity-50", "cursor-not-allowed");
-
-    // Reset the correct/incorrect state after a delay
-    setTimeout(() => {
-      isCorrect = null;
-      displayCurrentQuestion();
-    }, 1500);
-
-    updateNavigationButtons();
-  }
-
-  // Submit text answer
-  function submitTextAnswer() {
-    const textAnswer = document.getElementById("text-answer").value.trim();
-
-    if (textAnswer.length === 0) return;
-
-    userAnswers[currentQuestionIndex] = textAnswer;
-
-    // Check if answer is correct (approximate match)
-    const currentQuestion = questions[currentQuestionIndex];
-    const userAnswerLower = textAnswer.toLowerCase();
-    const correctAnswerLower = currentQuestion.correctAnswer.toLowerCase();
-
-    const isAnswerCorrect =
-      userAnswerLower === correctAnswerLower ||
-      correctAnswerLower.includes(userAnswerLower) ||
-      userAnswerLower.includes(correctAnswerLower);
-
-    if (isAnswerCorrect) {
-      currentScore++;
-      currentScoreEl.textContent = currentScore;
-      isCorrect = true;
-    } else {
-      isCorrect = false;
-    }
-
-    // Show feedback
-    displayCurrentQuestion();
-
-    // Enable navigation to next question
-    nextButton.disabled = false;
-    nextButton.classList.remove("opacity-50", "cursor-not-allowed");
-
-    // Reset the correct/incorrect state after a delay
-    setTimeout(() => {
-      isCorrect = null;
-      displayCurrentQuestion();
-    }, 1500);
-
-    updateNavigationButtons();
+    updateNavigationButtons()
   }
 
   // Navigate to next question
   function nextQuestion() {
     if (currentQuestionIndex < questions.length - 1) {
-      currentQuestionIndex++;
-      displayCurrentQuestion();
-      updateNavigationButtons();
+      currentQuestionIndex++
+      resetBackgroundColor() // Reset color when changing question
+      displayCurrentQuestion()
+      updateNavigationButtons()
     }
   }
 
   // Navigate to previous question
   function previousQuestion() {
     if (currentQuestionIndex > 0) {
-      currentQuestionIndex--;
-      displayCurrentQuestion();
-      updateNavigationButtons();
+      currentQuestionIndex--
+      resetBackgroundColor() // Reset color when changing question
+      displayCurrentQuestion()
+      updateNavigationButtons()
     }
   }
 
   // Update navigation buttons visibility
   function updateNavigationButtons() {
+    const prevBtn = document.getElementById("prev-btn")
+    const nextBtn = document.getElementById("next-btn")
+    const finishBtn = document.getElementById("finish-btn")
+
     // Show/hide previous button
     if (currentQuestionIndex > 0) {
-      prevButton.classList.remove("hidden");
+      prevBtn.classList.remove("hidden")
     } else {
-      prevButton.classList.add("hidden");
+      prevBtn.classList.add("hidden")
     }
 
-    // Show/hide next and finish buttons
+    // Show/hide next button
     if (currentQuestionIndex < questions.length - 1) {
-      nextButton.classList.remove("hidden");
-      finishButton.classList.add("hidden");
+      nextBtn.classList.remove("hidden")
+      finishBtn.classList.add("hidden")
     } else {
-      nextButton.classList.add("hidden");
+      nextBtn.classList.add("hidden")
 
       // Only show finish button if all questions are answered
-      const allAnswered = userAnswers.every((answer) => answer !== null);
+      const allAnswered = userAnswers.every((answer) => answer !== null)
       if (allAnswered) {
-        finishButton.classList.remove(
-          "hidden",
-          "opacity-50",
-          "cursor-not-allowed"
-        );
-        finishButton.disabled = false;
+        finishBtn.classList.remove("hidden")
       } else {
-        finishButton.classList.remove("hidden");
-        finishButton.classList.add("opacity-50", "cursor-not-allowed");
-        finishButton.disabled = true;
+        finishBtn.classList.add("hidden")
       }
     }
   }
 
-  function finishQuiz() {
-    // Ẩn phần quiz
-    quizSection.classList.add("hidden");
+  // Change background color based on answer correctness
+  function changeBackgroundColor(isCorrect) {
+    const quizCard = document.querySelector(".quiz-card")
+    const questionContainer = document.getElementById("question-container")
 
-    // Hiển thị phần kết quả
-    resultSection.classList.remove("hidden");
+    // Remove old color classes
+    quizCard.classList.remove("correct-background", "incorrect-background")
+    questionContainer.classList.remove("correct-background", "incorrect-background")
 
-    // Hiển thị điểm số
-    finalScoreEl.textContent = currentScore;
-    finalMaxScoreEl.textContent = questions.length;
+    // Add new color class
+    if (isCorrect) {
+      quizCard.classList.add("correct-background")
+      questionContainer.classList.add("correct-background")
 
-    // Hiển thị thông báo kết quả
-    const percentage = (currentScore / questions.length) * 100;
-    let message = "";
-
-    if (percentage === 100) {
-      message = "PERFECT SCORE! YOU'RE A CHAMPION!";
-    } else if (percentage >= 80) {
-      message = "GREAT JOB! YOU'VE LEVELED UP!";
-    } else if (percentage >= 60) {
-      message = "GOOD EFFORT! KEEP PRACTICING!";
-    } else if (percentage >= 40) {
-      message = "NOT BAD! TRY AGAIN FOR A HIGHER SCORE!";
+      // Gentle shake animation when correct
+      quizCard.classList.add("correct-animation")
+      setTimeout(() => {
+        quizCard.classList.remove("correct-animation")
+      }, 500)
     } else {
-      message = "GAME OVER! PRACTICE MORE AND TRY AGAIN!";
+      quizCard.classList.add("incorrect-background")
+      questionContainer.classList.add("incorrect-background")
+
+      // Strong shake animation when incorrect
+      quizCard.classList.add("incorrect-animation")
+      setTimeout(() => {
+        quizCard.classList.remove("incorrect-animation")
+      }, 500)
     }
 
-    resultMessageEl.textContent = message;
-
-    // Hiển thị chi tiết kết quả
-    detailedResultsEl.innerHTML = "";
-
-    questions.forEach((question, index) => {
-      const userAnswer = userAnswers[index];
-      let isCorrect = false;
-      let userAnswerDisplay = "";
-      let correctAnswerDisplay = "";
-
-      if (question.type === "single") {
-        isCorrect = userAnswer === question.correctAnswer;
-
-        // Find the text of the user's answer
-        if (userAnswer) {
-          const userOption = question.choices.find((choice) =>
-            choice.startsWith(userAnswer)
-          );
-          userAnswerDisplay = userOption || String(userAnswer);
-        } else {
-          userAnswerDisplay = "Chưa trả lời";
-        }
-
-        // Find the text of the correct answer
-        const correctOption = question.choices.find((choice) =>
-          choice.startsWith(question.correctAnswer)
-        );
-        correctAnswerDisplay = correctOption || question.correctAnswer;
-      } else if (question.type === "multiple") {
-        const correctAnswers = question.correctAnswer
-          .split(",")
-          .map((a) => a.trim());
-
-        if (Array.isArray(userAnswer)) {
-          isCorrect =
-            correctAnswers.length === userAnswer.length &&
-            correctAnswers.every((a) => userAnswer.includes(a)) &&
-            userAnswer.every((a) => correctAnswers.includes(a));
-
-          // Find the text of the user's answers
-          userAnswerDisplay = userAnswer
-            .map((ans) => {
-              const option = question.choices.find((choice) =>
-                choice.startsWith(ans)
-              );
-              return option || ans;
-            })
-            .join(", ");
-        } else {
-          userAnswerDisplay = "Chưa trả lời";
-        }
-
-        // Find the text of the correct answers
-        correctAnswerDisplay = correctAnswers
-          .map((ans) => {
-            const option = question.choices.find((choice) =>
-              choice.startsWith(ans)
-            );
-            return option || ans;
-          })
-          .join(", ");
-      } else if (question.type === "text") {
-        // Check for approximate match
-        const userAnswerLower = String(userAnswer).toLowerCase().trim();
-        const correctAnswerLower = question.correctAnswer.toLowerCase().trim();
-
-        isCorrect =
-          userAnswerLower === correctAnswerLower ||
-          correctAnswerLower.includes(userAnswerLower) ||
-          userAnswerLower.includes(correctAnswerLower);
-
-        userAnswerDisplay = String(userAnswer || "Chưa trả lời");
-        correctAnswerDisplay = question.correctAnswer;
-      }
-
-      const resultHtml = `
-      <div class="p-3 bg-white/10 rounded-md">
-        <h4 class="font-medium text-white">${index + 1}. ${
-        question.question
-      }</h4>
-        <div class="mt-2 space-y-1 text-sm">
-          <p>
-            <span class="text-gray-300">Đáp án của bạn: </span>
-            <span class="${isCorrect ? "text-green-400" : "text-red-400"}">
-              ${userAnswerDisplay}
-            </span>
-          </p>
-          <p>
-            <span class="text-gray-300">Đáp án đúng: </span>
-            <span class="text-green-400">${correctAnswerDisplay}</span>
-          </p>
-        </div>
-      </div>
-    `;
-
-      detailedResultsEl.innerHTML += resultHtml;
-    });
-
-    // Lưu kết quả vào localStorage
-    localStorage.setItem("currentScore", currentScore);
-    localStorage.setItem("userAnswers", JSON.stringify(userAnswers));
+    // Auto reset color after 1.5 seconds
+    setTimeout(() => {
+      resetBackgroundColor()
+    }, 1500)
   }
 
-  // Event Listener cho nút "Chơi lại"
-  const playAgainButton = document.getElementById("play-again-button");
-  playAgainButton.addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "index.html"; // Hoặc trang bạn muốn chuyển đến để chơi lại
-  });
-});
+  // Reset background color to default
+  function resetBackgroundColor() {
+    const quizCard = document.querySelector(".quiz-card")
+    const questionContainer = document.getElementById("question-container")
+
+    quizCard.classList.remove("correct-background", "incorrect-background", "correct-animation", "incorrect-animation")
+    questionContainer.classList.remove("correct-background", "incorrect-background")
+  }
+
+  // Create fireworks effect
+  function createFireworks() {
+    const fireworksContainer = document.createElement("div")
+    fireworksContainer.className = "fireworks-container"
+    document.body.appendChild(fireworksContainer)
+
+    // Create multiple fireworks with different colors
+    const colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080"]
+
+    // Create 50 firework particles
+    for (let i = 0; i < 100; i++) {
+      createParticle(fireworksContainer, colors)
+    }
+
+    // Remove container after effect ends
+    setTimeout(() => {
+      fireworksContainer.remove()
+    }, 3000)
+  }
+
+  // Create individual firework particle
+  function createParticle(container, colors) {
+    const particle = document.createElement("div")
+    particle.className = "firework-particle"
+
+    // Initial position (center of screen)
+    const startX = window.innerWidth / 2
+    const startY = window.innerHeight / 2
+
+    // Random color
+    const color = colors[Math.floor(Math.random() * colors.length)]
+
+    // Random size
+    const size = Math.random() * 8 + 4
+
+    // Random angle and distance
+    const angle = Math.random() * Math.PI * 2
+    const distance = Math.random() * 150 + 50
+
+    // Random speed
+    const duration = Math.random() * 1 + 1
+
+    // Target position
+    const destX = startX + Math.cos(angle) * distance
+    const destY = startY + Math.sin(angle) * distance
+
+    // Set style
+    particle.style.backgroundColor = color
+    particle.style.width = `${size}px`
+    particle.style.height = `${size}px`
+    particle.style.position = "fixed"
+    particle.style.borderRadius = "50%"
+    particle.style.zIndex = "9999"
+    particle.style.opacity = "1"
+    particle.style.left = `${startX}px`
+    particle.style.top = `${startY}px`
+
+    container.appendChild(particle)
+
+    // Animation
+    setTimeout(() => {
+      particle.style.transition = `all ${duration}s cubic-bezier(0.1, 0.5, 0.5, 1)`
+      particle.style.left = `${destX}px`
+      particle.style.top = `${destY}px`
+      particle.style.opacity = "0"
+    }, 10)
+
+    // Remove particle after animation ends
+    setTimeout(
+      () => {
+        particle.remove()
+      },
+      duration * 1000 + 100,
+    )
+  }
+
+  // Getters for quiz state
+  function getUserAnswers() {
+    return userAnswers
+  }
+
+  function getCurrentQuestionIndex() {
+    return currentQuestionIndex
+  }
+
+  function getCurrentScore() {
+    return currentScore
+  }
+
+  // Public API
+  return {
+    initQuiz,
+    resetQuizState,
+    displayCurrentQuestion,
+    selectAnswer,
+    nextQuestion,
+    previousQuestion,
+    updateNavigationButtons,
+    changeBackgroundColor,
+    resetBackgroundColor,
+    createFireworks,
+    getUserAnswers,
+    getCurrentQuestionIndex,
+    getCurrentScore,
+  }
+})()
+
+// Export functions to global scope for HTML onclick handlers
+window.nextQuestion = window.quizModule.nextQuestion
+window.previousQuestion = window.quizModule.previousQuestion
+

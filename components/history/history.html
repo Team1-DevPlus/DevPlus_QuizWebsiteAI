@@ -41,7 +41,7 @@
             id="new-quiz-btn"
             class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md"
           >
-            Generate new Quiz
+            <a href="/index.html">Generate new Quiz</a>
           </button>
         </div>
       </div>
@@ -75,19 +75,6 @@
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex-1">
             <label
-              for="category"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Topic</label
-            >
-            <select
-              id="category"
-              class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
-            >
-              <option value="all">All topic</option>
-            </select>
-          </div>
-          <div class="flex-1">
-            <label
               for="date-range"
               class="block text-sm font-medium text-gray-700 mb-1"
               >Times</label
@@ -114,7 +101,7 @@
             >
               <option value="date-desc">Day (Newest)</option>
               <option value="date-asc">Day (Oldest)</option>
-              <option value="score-desc">Point (highestt)</option>
+              <option value="score-desc">Point (Highestt)</option>
               <option value="score-asc">Point (Lowest)</option>
             </select>
           </div>
@@ -156,7 +143,7 @@
       </div>
     </footer>
 
-    <script src="js/db.js"></script>
-    <script src="js/history.js"></script>
+    <script src="../history/db.js"></script>
+    <script src="../history/history.js"></script>
   </body>
 </html>
