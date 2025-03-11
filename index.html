@@ -1,90 +1,103 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevPlus Quiz Website - Under Construction</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-
-        p {
-            font-size: 1.2em;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        .construction-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            margin-top: 20px;
-            overflow: hidden;
-        }
-
-        .progress {
-            width: 70%;
-            height: 100%;
-            background: white;
-            animation: progress 2s ease-in-out infinite;
-        }
-
-        @keyframes progress {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(400%); }
-        }
-    </style>
-</head>
-<body>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trắc nghiệm AI</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
     <div class="container">
-        <div class="construction-icon">🚧</div>
-        <h1>DevPlus Quiz Website</h1>
-        <p>We're working hard to bring you an amazing quiz experience. Our website is currently under construction and will be ready soon!</p>
-        <div class="progress-bar">
-            <div class="progress"></div>
+      <div class="quiz-card">
+        <h1 class="title">Trắc nghiệm AI</h1>
+
+        <!-- Setup Section -->
+        <div id="setup-section" class="section">
+          <div class="form-group">
+            <input type="text" id="topic" placeholder="Nhập chủ đề..." />
+            <input
+              type="number"
+              id="question-count"
+              placeholder="Số câu hỏi"
+              min="1"
+              max="10"
+            />
+          </div>
+          <button onclick="generateQuestions()" class="btn btn-primary">
+            Tạo câu hỏi
+          </button>
+          <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Đang tạo câu hỏi...</p>
+          </div>
         </div>
+
+        <!-- Preview Section -->
+        <div id="preview-section" class="hidden">
+          <h2>Xem trước câu hỏi</h2>
+          <div id="preview-container"></div>
+          <button onclick="startQuiz()">🎯 Bắt đầu làm bài</button>
+          <button onclick="addNewQuestion()">➕ Thêm câu hỏi</button>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="section hidden">
+          <div class="quiz-header">
+            <div class="quiz-progress">
+              Câu hỏi <span id="current-question">1</span>/<span
+                id="total-questions"
+                >5</span
+              >
+            </div>
+            <div class="quiz-score">
+              Điểm: <span id="current-score">0</span>/<span id="max-score"
+                >0</span
+              >
+            </div>
+          </div>
+
+          <div id="question-container" class="question-container"></div>
+
+          <div class="quiz-navigation">
+            <button
+              id="prev-btn"
+              onclick="previousQuestion()"
+              class="btn btn-secondary hidden"
+            >
+              Câu trước
+            </button>
+            <button
+              id="next-btn"
+              onclick="nextQuestion()"
+              class="btn btn-primary hidden"
+            >
+              Câu tiếp theo
+            </button>
+            <button
+              id="finish-btn"
+              onclick="finishQuiz()"
+              class="btn btn-success hidden"
+            >
+              Hoàn thành
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="section hidden">
+          <h2>Kết quả</h2>
+          <div class="final-score">
+            <span id="final-score">0</span>/<span id="final-max-score">0</span>
+          </div>
+          <div id="detailed-results"></div>
+          <p id="result-message">Chúc mừng! Bạn đã hoàn thành bài kiểm tra.</p>
+          <button onclick="resetQuiz()" class="btn btn-primary">Làm lại</button>
+          <button onclick="goBackToPreview()" class="btn btn-secondary">
+            Quay lại
+          </button>
+        </div>
+      </div>
     </div>
-</body>
+    <script src="js/script.js"></script>
+  </body>
 </html>
