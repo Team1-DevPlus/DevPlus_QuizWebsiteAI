@@ -1,72 +1,92 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trắc nghiệm AI</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
     <div class="container">
-        <div class="quiz-card">
-            <h1 class="title">Trắc nghiệm AI</h1>
-            
-            <!-- Setup Section -->
-            <div id="setup-section" class="section">
-                <div class="form-group">
-                    <input type="text" id="topic" placeholder="Nhập chủ đề...">
-                    <input type="number" id="question-count" placeholder="Số câu hỏi" min="1" max="10">
-                </div>
-                <button onclick="generateQuestions()" class="btn btn-primary">
-                    Tạo câu hỏi
-                </button>
-                <div id="loading" class="loading hidden">
-                    <div class="spinner"></div>
-                    <p>Đang tạo câu hỏi...</p>
-                </div>
-            </div>
-            
-            <!-- Quiz Section -->
-            <div id="quiz-section" class="section hidden">
-                <div class="quiz-header">
-                    <div class="quiz-progress">
-                        Câu hỏi <span id="current-question">1</span>/<span id="total-questions">5</span>
-                    </div>
-                    <div class="quiz-score">
-                        Điểm: <span id="current-score">0</span>/<span id="max-score">0</span>
-                    </div>
-                </div>
-                
-                <div id="question-container" class="question-container"></div>
-                
-                <div class="quiz-navigation">
-                    <button id="prev-btn" onclick="previousQuestion()" class="btn btn-secondary hidden">
-                        Câu trước
-                    </button>
-                    <button id="next-btn" onclick="nextQuestion()" class="btn btn-primary hidden">
-                        Câu tiếp theo
-                    </button>
-                    <button id="finish-btn" onclick="finishQuiz()" class="btn btn-success hidden">
-                        Hoàn thành
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Results Section -->
-            <div id="results-section" class="section hidden">
-                <h2>Kết quả</h2>
-                <div class="final-score">
-                    <span id="final-score">0</span>/<span id="final-max-score">0</span>
-                </div>
-                <div id="detailed-results"></div>
-                <p id="result-message">Chúc mừng! Bạn đã hoàn thành bài kiểm tra.</p>
-                <button onclick="resetQuiz()" class="btn btn-primary">
-                    Làm lại
-                </button>
-            </div>
-        </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+      <div class="quiz-card">
+        <h1 class="title">Trắc nghiệm AI</h1>
 
+        <!-- Setup Section -->
+        <div id="setup-section" class="section">
+          <div class="form-group">
+            <input type="text" id="topic" placeholder="Nhập chủ đề..." />
+            <input
+              type="number"
+              id="question-count"
+              placeholder="Số câu hỏi"
+              min="1"
+              max="10"
+            />
+          </div>
+          <button onclick="generateQuestions()" class="btn btn-primary">
+            Tạo câu hỏi
+          </button>
+          <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Đang tạo câu hỏi...</p>
+          </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="section hidden">
+          <div class="quiz-header">
+            <div class="quiz-progress">
+              Câu hỏi <span id="current-question">1</span>/<span
+                id="total-questions"
+                >5</span
+              >
+            </div>
+            <div class="quiz-score">
+              Điểm: <span id="current-score">0</span>/<span id="max-score"
+                >0</span
+              >
+            </div>
+          </div>
+
+          <div id="question-container" class="question-container"></div>
+
+          <div class="quiz-navigation">
+            <button
+              id="prev-btn"
+              onclick="previousQuestion()"
+              class="btn btn-secondary hidden"
+            >
+              Câu trước
+            </button>
+            <button
+              id="next-btn"
+              onclick="nextQuestion()"
+              class="btn btn-primary hidden"
+            >
+              Câu tiếp theo
+            </button>
+            <button
+              id="finish-btn"
+              onclick="finishQuiz()"
+              class="btn btn-success hidden"
+            >
+              Hoàn thành
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="section hidden">
+          <h2>Kết quả</h2>
+          <div class="final-score">
+            <span id="final-score">0</span>/<span id="final-max-score">0</span>
+          </div>
+          <div id="detailed-results"></div>
+          <p id="result-message">Chúc mừng! Bạn đã hoàn thành bài kiểm tra.</p>
+          <button onclick="resetQuiz()" class="btn btn-primary">Làm lại</button>
+        </div>
+      </div>
+    </div>
+    <script src="js/script.js"></script>
+  </body>
+</html>
