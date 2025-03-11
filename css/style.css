@@ -34,17 +34,15 @@ body {
 
 /* Hiệu ứng màu nền khi đúng/sai */
 .correct-background {
-  background-color: rgba(220, 252, 231, 0.7) !important;
-  /* Màu xanh nhạt */
-  border: 2px solid #22c55e !important;
-  transition: all 0.3s ease;
+  background-color: rgba(167, 243, 208, 0.5) !important;
+  border-color: #10b981 !important;
+  transition: background-color 0.3s ease;
 }
 
 .incorrect-background {
-  background-color: rgba(254, 226, 226, 0.7) !important;
-  /* Màu đỏ nhạt */
-  border: 2px solid #ef4444 !important;
-  transition: all 0.3s ease;
+  background-color: rgba(254, 202, 202, 0.5) !important;
+  border-color: #ef4444 !important;
+  transition: background-color 0.3s ease;
 }
 
 /* Hiệu ứng rung khi đúng/sai */
@@ -140,10 +138,19 @@ body {
 
 .section {
   margin-bottom: 20px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
+}
+
+.section.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  display: none !important;
 }
 
 /* Form elements */
@@ -345,6 +352,25 @@ input:focus {
 .quiz-navigation {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.quiz-navigation button {
+  transition: all 0.3s ease;
+}
+
+.quiz-navigation button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-navigation button svg {
+  transition: all 0.3s ease;
+}
+
+.quiz-navigation button:hover svg {
+  transform: scale(1.1);
 }
 
 /* Results section */
@@ -356,8 +382,13 @@ input:focus {
   border-bottom: 1px solid #ddd;
   padding: 15px 0;
   text-align: left;
+  transition: all 0.3s ease;
 }
 
+.result-question:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
 
 .correct-answer {
   color: green;
@@ -385,7 +416,66 @@ input:focus {
 #result-message {
   font-size: 18px;
   margin-bottom: 24px;
+  text-align: center;
 }
+
+#result-icon {
+  font-size: 2rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Score circle animation */
+#score-circle {
+  transition: stroke-dashoffset 1.5s ease-in-out, stroke 0.5s ease;
+}
+
+/* Result card hover effects */
+.result-question {
+  transition: all 0.3s ease;
+}
+
+.result-question:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Detailed results styling */
+#detailed-results {
+  counter-reset: question-counter;
+}
+
+/* Animations for results section */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.results-section:not(.hidden) {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.result-question {
+  animation: fadeInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+/* Stagger the animations of result questions */
+#detailed-results .result-question:nth-child(1) { animation-delay: 0.1s; }
+#detailed-results .result-question:nth-child(2) { animation-delay: 0.2s; }
+#detailed-results .result-question:nth-child(3) { animation-delay: 0.3s; }
+#detailed-results .result-question:nth-child(4) { animation-delay: 0.4s; }
+#detailed-results .result-question:nth-child(5) { animation-delay: 0.5s; }
+#detailed-results .result-question:nth-child(6) { animation-delay: 0.6s; }
+#detailed-results .result-question:nth-child(7) { animation-delay: 0.7s; }
+#detailed-results .result-question:nth-child(8) { animation-delay: 0.8s; }
+#detailed-results .result-question:nth-child(9) { animation-delay: 0.9s; }
+#detailed-results .result-question:nth-child(10) { animation-delay: 1.0s; }
 
 /* Hiệu ứng chuyển tiếp */
 .section {
@@ -462,4 +552,122 @@ button:hover {
 
 .preview-actions button:hover {
   background-color: #45a049;
+}
+
+/* Drag and Drop Question Styles */
+.item {
+  transition: all 0.2s ease;
+}
+
+.item.dragging {
+  opacity: 0.5;
+  background-color: #f0f9ff;
+}
+
+.item.drag-over {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.handle {
+  cursor: move;
+  user-select: none;
+}
+
+/* Match Answer Question Styles */
+.match-container {
+  position: relative;
+  min-height: 300px;
+}
+
+.match-item-a, .match-item-b {
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.match-item-a:hover, .match-item-b:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #f0f7ff;
+}
+
+.selected-item {
+  border-color: #3b82f6 !important;
+  background-color: #eff6ff !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.match-item-a {
+  border-left: 4px solid #3b82f6;
+  padding-left: 12px;
+}
+
+.match-item-b {
+  border-right: 4px solid #3b82f6;
+  padding-right: 12px;
+  justify-content: flex-end;
+}
+
+#connection-lines line {
+  stroke-dasharray: 4;
+  animation: dash 30s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}
+
+#current-connections {
+  min-height: 50px;
+}
+
+.delete-connection {
+  transition: all 0.2s ease;
+}
+
+.delete-connection:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* Animation for drag items */
+@keyframes wiggle {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.item:hover {
+  animation: wiggle 0.5s ease;
+}
+
+/* Highlight effect for match items */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.match-item-a.selected-item {
+  animation: pulse 1.5s infinite;
+}
+
+/* Improve connection lines */
+#connection-lines line {
+  stroke-width: 2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Improve connection list */
+#current-connections li {
+  transition: all 0.3s ease;
+}
+
+#current-connections li:hover {
+  background-color: #f9fafb;
+  transform: translateY(-2px);
 }
