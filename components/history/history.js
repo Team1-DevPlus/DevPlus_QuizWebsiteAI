@@ -55,17 +55,17 @@ function renderQuizList(containerId, quizzes) {
 
   if (quizzes.length === 0) {
     container.innerHTML =
-      '<p class="text-gray-500 text-center py-4">No quizzes found</p>';
+      '<p class="text-gray-400 font-arcade text-center py-4">No quizzes found</p>';
     return;
   }
 
   // Create list
   const list = document.createElement("ul");
-  list.className = "divide-y divide-gray-200";
+  list.className = "";
 
   quizzes.forEach((quiz) => {
     const li = document.createElement("li");
-    li.className = "hover:bg-gray-50";
+    li.className = "p-3";
 
     // Calculate time spent
     const timeSpent = quiz.endTime
@@ -94,66 +94,71 @@ function renderQuizList(containerId, quizzes) {
 
     // Create quiz item HTML
     li.innerHTML = `
-      <div class="px-4 py-4 sm:px-6">
-        <div class="flex items-center justify-between">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <p class="text-sm font-medium text-primary-600 truncate">
-              ${quiz.topic}
-            </p>
-            <div class="flex items-center">
-              ${
-                quiz.status === "completed"
-                  ? `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${scoreBadgeClass}">
-                  ${Math.round(
-                    quiz.scorePercentage ||
-                      (quiz.finalScore / quiz.questionCount) * 100
-                  )}%
-                </span>
-                <span class="ml-2 text-xs text-gray-500">
-                  ${quiz.finalScore || quiz.currentScore}/${
-                      quiz.questionCount
-                    } correct
-                </span>`
-                  : `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                  In Progress
-                </span>
-                <span class="ml-2 text-xs text-gray-500">
-                  ${quiz.currentScore || 0}/${quiz.questionCount} correct
-                </span>`
-              }
-            </div>
-          </div>
-          <div class="flex flex-col items-end text-sm text-gray-500">
-            <time datetime="${date.toISOString()}">${formattedDate}</time>
-            <span>${timeSpent}</span>
-          </div>
-        </div>
-        <div class="mt-2 sm:flex sm:justify-between">
-          <div class="sm:flex">
-            <p class="flex items-center text-sm text-gray-500">
-              <span class="inline-block h-2 w-2 flex-shrink-0 rounded-full bg-primary-500 mr-2"></span>
-              ${quiz.questionCount} questions
-            </p>
-          </div>
-          <div class="mt-2 sm:mt-0">
-            ${
-              quiz.status === "incomplete"
-                ? `<div class="flex space-x-2">
-                <button class="resume-quiz text-xs bg-primary-600 hover:bg-primary-700 text-white px-2 py-1 rounded"
-                  data-id="${quiz.id}">Resume</button>
-                <button class="delete-quiz text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
-                  data-id="${quiz.id}">Delete</button>
-              </div>`
-                : `<div class="flex space-x-2">
-                <button class="retake-quiz text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded"
-                  data-id="${quiz.id}">Retake</button>
-                <button class="delete-quiz text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
-                  data-id="${quiz.id}">Delete</button>
-              </div>`
-            }
-          </div>
-        </div>
+      <li class="bg-white/50 rounded-lg overflow-hidden p-4">
+  <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+      <p class="text-sm font-semibold text-primary-600 truncate text-dark font-arcade">
+        ${quiz.topic}
+      </p>
+      <div class="flex items-center">
+        ${
+          quiz.status === "completed"
+            ? `<span class="px-3 py-1 text-xs font-bold rounded-full text-dark font-arcade ${scoreBadgeClass}">
+                ${Math.round(
+                  quiz.scorePercentage ||
+                    (quiz.finalScore / quiz.questionCount) * 100
+                )}%
+              </span>
+              <span class="ml-2 text-xs text-gray-500 ">
+                ${quiz.finalScore || quiz.currentScore}/${
+                quiz.questionCount
+              } correct
+              </span>`
+            : `<span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 text-dark font-arcade">
+                In Progress
+              </span>
+              <span class="ml-2 text-xs text-gray-500">
+                ${quiz.currentScore || 0}/${quiz.questionCount} correct
+              </span>`
+        }
       </div>
+    </div>
+    <div class="text-sm text-gray-500 text-right text-dark font-arcade">
+      <time datetime="${date.toISOString()}" class="block font-medium">${formattedDate}</time>
+      <span class="text-xs">${timeSpent}</span>
+    </div>
+  </div>
+
+  <div class="mt-3 flex flex-col sm:flex-row sm:justify-between">
+    <p class="flex items-center text-sm text-dark font-arcade">
+      <span class="h-2 w-2 rounded-full bg-primary-500 mr-2 text-dark font-arcade"></span>
+      ${quiz.questionCount} questions
+    </p>
+
+    <div class="mt-2 sm:mt-0 flex space-x-3">
+      ${
+        quiz.status === "incomplete"
+          ? `<button class="retake-quiz text-xs px-3 py-1 rounded-lg bg-green-300 hover:bg-green-700  font-medium shadow-sm transition text-dark font-arcade"
+              data-id="${quiz.id}" aria-label="Resume Quiz">
+              Resume
+            </button>
+            <button class="delete-quiz text-xs px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 font-medium shadow-sm transition text-dark font-arcade"
+              data-id="${quiz.id}" aria-label="Delete Quiz">
+              Delete
+            </button>`
+          : `<button class="retake-quiz text-xs px-3 py-1 rounded-lg bg-green-600 hover:bg-green-700  font-medium shadow-sm transition text-dark font-arcade"
+              data-id="${quiz.id}" aria-label="Retake Quiz">
+              Retake
+            </button>
+            <button class="delete-quiz text-xs px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700  font-medium shadow-sm transition text-dark font-arcade"
+              data-id="${quiz.id}" aria-label="Delete Quiz">
+              Delete
+            </button>`
+      }
+    </div>
+  </div>
+</li>
+
     `;
 
     list.appendChild(li);
@@ -225,7 +230,7 @@ function addQuizActionListeners() {
   document.querySelectorAll(".resume-quiz").forEach((button) => {
     button.addEventListener("click", async (event) => {
       const quizId = Number.parseInt(event.target.dataset.id);
-      window.location.href = `../../index.html?id=${quizId}`;
+      window.location.href = `../home/Home.html?id=${quizId}`;
     });
   });
 
@@ -250,7 +255,7 @@ function addQuizActionListeners() {
         };
 
         const newQuizId = await window.quizDB.saveQuiz(newQuiz);
-        window.location.href = `../../index.html?id=${newQuizId}`;
+        window.location.href = `../home/Home.html?id=${newQuizId}`;
       } catch (error) {
         console.error("Failed to retake quiz:", error);
         showErrorMessage("Failed to retake quiz. Please try again.");
@@ -265,7 +270,6 @@ function addQuizActionListeners() {
       if (confirm("Are you sure you want to delete this quiz?")) {
         try {
           await window.quizDB.deleteQuiz(quizId);
-          // Reload quiz history
           await loadQuizHistory();
         } catch (error) {
           console.error("Failed to delete quiz:", error);

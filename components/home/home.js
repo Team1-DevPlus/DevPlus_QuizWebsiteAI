@@ -35,8 +35,8 @@ async function generateQuestions() {
     document.getElementById("question-count").value
   );
 
-  if (!topic || isNaN(count) || count < 1 || count > 50) {
-    alert("Please enter a valid topic and number of questions (1-50)!");
+  if (!topic || isNaN(count) || count < 1 || count > 20) {
+    alert("Please enter a valid topic and number of questions (1-20)!");
     return;
   }
 
@@ -57,17 +57,55 @@ async function generateQuestions() {
           {
             parts: [
               {
-                text: `Create ${count} different multiple-choice questions about: ${topic} and level is ${level}.
-                Each question has 4 answer options (A, B, C, D), with only 1 correct answer.
-                Return each question in the following format and separate with "---":
-                Question: <question>
-                A. <answer A>
-                B. <answer B>
-                C. <answer C>
-                D. <answer D>
-                Correct answer: <letter of correct answer>
-                Reason: <reason for correct answer>
-                ---
+                text: `Create ${count} unique **multiple-choice questions** about: "${topic}" at difficulty level: "${level}".
+**Question Format:**
+Each question must have:
+- A clear and **well-structured** question statement.
+- **Four answer options** labeled (A, B, C, D).
+- **One correct answer** (marked as A, B, C, or D).
+- A **detailed explanation** for the correct answer.
+- Return the questions **separated by "---"** for easy parsing.
+
+**Output Format:**
+---
+Question: <question>
+A. <answer A>
+B. <answer B>
+C. <answer C>
+D. <answer D>
+Correct answer: <letter of correct answer>
+Reason: <detailed explanation>
+---
+
+### **Requirements:**
+✅ **Avoid vague, ambiguous, or opinion-based questions.**
+✅ **Ensure answers are factual and verifiable.**
+✅ **Use engaging real-world examples where possible.**
+✅ **Ensure diverse question topics within the main theme.**
+✅ **Vary the difficulty while keeping the format consistent.**
+
+**Example Output:**
+---
+Question: What is the chemical symbol for gold?
+A. Au
+B. Ag
+C. Fe
+D. Pb
+Correct answer: A
+Reason: "Au" is the chemical symbol for gold, derived from the Latin word "Aurum".
+
+---
+Question: Which planet is known as the Red Planet?
+A. Earth
+B. Venus
+C. Mars
+D. Jupiter
+Correct answer: C
+Reason: Mars is called the Red Planet because of its reddish appearance due to iron oxide on its surface.
+
+---
+
+This ensures high-quality, structured, and **accurate multiple-choice questions** for your quiz system. 🚀
                 `,
               },
             ],
@@ -437,18 +475,39 @@ async function replaceQuestion(index) {
           {
             parts: [
               {
-                text: `Create 1 multiple-choice question **that does not duplicate** any of the following questions on the topic "${topic}".
-                Existing questions:
-                ${existingQuestions.join("\n")}
-                The question has 4 answer options (A, B, C, D), with only 1 correct answer.
-                Return in the format:
-                Question: <question>
-                A. <answer A>
-                B. <answer B>
-                C. <answer C>
-                D. <answer D>
-                Correct answer: <letter of correct answer>
-                Reason: <reason for correct answer>
+                text: `Create **1 unique multiple-choice question** on the topic: "${topic}".
+
+⚠ **Important:** The generated question **must NOT duplicate** any of the following existing questions:
+${existingQuestions.join("\n")}
+
+### **Requirements:**
+- The question must be **original** and **not similar** to the provided ones.
+- Ensure **diversity in wording, structure, and concept** compared to the existing questions.
+- The question must have **4 answer choices (A, B, C, D)** with **only 1 correct answer**.
+- Provide a **detailed reason** for why the correct answer is correct.
+- Return the question in the format below:
+
+### **Output Format:**
+---
+Question: <question>
+A. <answer A>
+B. <answer B>
+C. <answer C>
+D. <answer D>
+Correct answer: <letter of correct answer>
+Reason: <detailed explanation>
+---
+
+### **Best Practices:**
+✅ **Ensure factual accuracy and clarity** in the question.
+✅ **Vary question difficulty** while keeping it engaging.
+✅ **Use different question structures** (e.g., definitions, real-world applications, cause-effect).
+✅ **Avoid rephrasing existing questions—generate truly new ones.**
+
+---
+
+This **ensures high-quality and unique question generation** while preventing duplicates. 🚀
+
                 ---`,
               },
             ],

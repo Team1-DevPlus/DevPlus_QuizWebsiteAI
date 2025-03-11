@@ -92,7 +92,7 @@
 
   <!-- Main content -->
   <div class="container mx-auto px-4 py-8 relative z-20">
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-xl mx-auto">
       <h1 class="text-center text-4xl md:text-5xl font-arcade text-white mb-8 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
         LEVEL UP QUIZ
       </h1>
@@ -198,6 +198,10 @@
               class="px-5 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-200">
               ➕ Add Question
             </button>
+            <button onclick="goHome()"
+              class="px-5 py-3 bg-gray-600 text-white rounded-lg shadow-md hover:bg-gray-700 transition duration-200">
+              ⬅️ Home
+            </button>
           </div>
         </div>
         <!-- Quiz Section -->
@@ -285,7 +289,9 @@
           </div>
         </div>
 
-
+        <footer class="text-[10px] text-dark font-arcade text-center pt-10">© 2025 AI Quiz Generator - Team 1 -
+          Devplus
+        </footer>
       </div>
     </div>
   </div>
@@ -294,6 +300,11 @@
   <script src="../quiz/quiz.js"></script>
   <script src="../history/db.js"></script>
   <script src="home.js"></script>
+  <script>
+    function goHome() {
+      window.location.href = "index.html"; // Change this to your home page URL
+    }
+  </script>
 </body>
 
 </html>
