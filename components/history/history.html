@@ -1,149 +1,131 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quiz History</title>
-    <link rel="stylesheet" href="css/style.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                50: "#f0f9ff",
-                100: "#e0f2fe",
-                200: "#bae6fd",
-                300: "#7dd3fc",
-                400: "#38bdf8",
-                500: "#0ea5e9",
-                600: "#0284c7",
-                700: "#0369a1",
-                800: "#075985",
-                900: "#0c4a6e",
-              },
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz History</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: "#f0f9ff",
+              100: "#e0f2fe",
+              200: "#bae6fd",
+              300: "#7dd3fc",
+              400: "#38bdf8",
+              500: "#0ea5e9",
+              600: "#0284c7",
+              700: "#0369a1",
+              800: "#075985",
+              900: "#0c4a6e",
             },
           },
         },
-      };
-    </script>
-  </head>
-  <body class="bg-gray-50 min-h-screen">
-    <header class="bg-white shadow">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">Quiz history</h1>
-            <p class="mt-2 text-sm text-gray-600">Progess and Result tracker</p>
-          </div>
-          <button
-            id="new-quiz-btn"
-            class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md"
-          >
-            <a href="/index.html">Generate new Quiz</a>
-          </button>
-        </div>
-      </div>
-    </header>
+      },
+    };
+  </script>
+</head>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Stats overview -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-          <p class="text-sm font-medium text-gray-500">Total Quiz</p>
-          <p id="total-quizzes" class="text-3xl font-bold text-gray-900 mt-2">
-            0
-          </p>
+<body class="bg-gray-50 min-h-screen">
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Quiz history</h1>
+          <p class="mt-2 text-sm text-gray-600">Progess and Result tracker</p>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <p class="text-sm font-medium text-gray-500">Average Point</p>
-          <p id="average-score" class="text-3xl font-bold text-gray-900 mt-2">
-            0%
-          </p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <p class="text-sm font-medium text-gray-500">Highest Point</p>
-          <p id="best-score" class="text-3xl font-bold text-gray-900 mt-2">
-            0%
-          </p>
-        </div>
+        <button id="new-quiz-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md">
+          <a href="../home/Home.html">Generate new Quiz</a>
+        </button>
       </div>
+    </div>
+  </header>
 
-      <!-- Filter controls -->
-      <div class="bg-white rounded-lg shadow p-4 mb-8">
-        <div class="flex flex-col sm:flex-row gap-4">
-          <div class="flex-1">
-            <label
-              for="date-range"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Times</label
-            >
-            <select
-              id="date-range"
-              class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
-            >
-              <option value="all">All</option>
-              <option value="week">Last week</option>
-              <option value="month">Last month</option>
-              <option value="year">Last Year</option>
-            </select>
-          </div>
-          <div class="flex-1">
-            <label
-              for="sort"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Soting Order</label
-            >
-            <select
-              id="sort"
-              class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border"
-            >
-              <option value="date-desc">Day (Newest)</option>
-              <option value="date-asc">Day (Oldest)</option>
-              <option value="score-desc">Point (Highestt)</option>
-              <option value="score-asc">Point (Lowest)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Incomplete quizzes section -->
-      <div class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">
-          Incompleted Quizzes List
-        </h2>
-        <div
-          id="incomplete-list"
-          class="bg-white rounded-lg shadow overflow-hidden"
-        >
-          <p class="text-gray-500 text-center py-4">Loading...</p>
-        </div>
-      </div>
-
-      <!-- Completed quizzes section -->
-      <div>
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">
-          Completed Quizzes list
-        </h2>
-        <div
-          id="completed-list"
-          class="bg-white rounded-lg shadow overflow-hidden"
-        >
-          <p class="text-gray-500 text-center py-4">Loading...</p>
-        </div>
-      </div>
-    </main>
-
-    <footer class="bg-white border-t border-gray-200 mt-8">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <p class="text-center text-sm text-gray-500">
-          © 2025 AI Quiz Generate. All rights reserved.
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Stats overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm font-medium text-gray-500">Total Quiz</p>
+        <p id="total-quizzes" class="text-3xl font-bold text-gray-900 mt-2">
+          0
         </p>
       </div>
-    </footer>
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm font-medium text-gray-500">Average Point</p>
+        <p id="average-score" class="text-3xl font-bold text-gray-900 mt-2">
+          0%
+        </p>
+      </div>
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm font-medium text-gray-500">Highest Point</p>
+        <p id="best-score" class="text-3xl font-bold text-gray-900 mt-2">
+          0%
+        </p>
+      </div>
+    </div>
 
-    <script src="../history/db.js"></script>
-    <script src="../history/history.js"></script>
-  </body>
+    <!-- Filter controls -->
+    <div class="bg-white rounded-lg shadow p-4 mb-8">
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <label for="date-range" class="block text-sm font-medium text-gray-700 mb-1">Times</label>
+          <select id="date-range"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border">
+            <option value="all">All</option>
+            <option value="week">Last week</option>
+            <option value="month">Last month</option>
+            <option value="year">Last Year</option>
+          </select>
+        </div>
+        <div class="flex-1">
+          <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Soting Order</label>
+          <select id="sort"
+            class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2 px-3 border">
+            <option value="date-desc">Day (Newest)</option>
+            <option value="date-asc">Day (Oldest)</option>
+            <option value="score-desc">Point (Highestt)</option>
+            <option value="score-asc">Point (Lowest)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incomplete quizzes section -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">
+        Incompleted Quizzes List
+      </h2>
+      <div id="incomplete-list" class="bg-white rounded-lg shadow overflow-hidden">
+        <p class="text-gray-500 text-center py-4">Loading...</p>
+      </div>
+    </div>
+
+    <!-- Completed quizzes section -->
+    <div>
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">
+        Completed Quizzes list
+      </h2>
+      <div id="completed-list" class="bg-white rounded-lg shadow overflow-hidden">
+        <p class="text-gray-500 text-center py-4">Loading...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-white border-t border-gray-200 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <p class="text-center text-sm text-gray-500">
+        © 2025 AI Quiz Generate. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="../history/db.js"></script>
+  <script src="../history/history.js"></script>
+</body>
+
 </html>
