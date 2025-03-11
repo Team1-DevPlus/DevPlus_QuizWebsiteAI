@@ -111,6 +111,26 @@ window.quizModule = (() => {
 
     // Enable navigation to next question
     updateNavigationButtons();
+
+    // Save progress to IndexedDB immediately
+    try {
+      const quizId = window.currentQuizId; // Get current quiz ID from global scope
+      if (quizId) {
+        const quizData = await window.quizDB.getQuiz(quizId);
+        if (quizData && quizData.status === "incomplete") {
+          // Update with current state
+          quizData.userAnswers = userAnswers;
+          quizData.currentQuestionIndex = currentQuestionIndex;
+          quizData.currentScore = currentScore;
+          quizData.lastSaved = Date.now();
+
+          await window.quizDB.saveQuiz(quizData);
+          console.log("Answer saved to database");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save answer:", error);
+    }
   }
 
   // Navigate to next question

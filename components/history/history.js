@@ -102,10 +102,10 @@ function renderQuizList(containerId, quizzes) {
 
     // Format date
     const date = new Date(quiz.timestamp);
-    const formattedDate = date.toLocaleDateString("vi-VN", {
+    const formattedDate = date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
-      day: "numeric",
+      day: "numeric"
     });
 
     // Calculate score badge class
@@ -274,22 +274,26 @@ function addQuizActionListeners() {
       const quizId = Number.parseInt(event.target.dataset.id);
       try {
         const quiz = await window.quizDB.getQuiz(quizId);
+        if (quiz.status === "incomplete") {
+          // If quiz is incomplete, just resume it
+          window.location.href = `../home/Home.html?id=${quizId}`;
+        } else {
+          // If quiz is completed, create a new one
+          const newQuiz = {
+            topic: quiz.topic,
+            questionCount: quiz.questionCount,
+            questions: quiz.questions,
+            userAnswers: Array(quiz.questions.length).fill(null),
+            currentQuestionIndex: 0,
+            currentScore: 0,
+            status: "incomplete",
+            timestamp: Date.now(),
+            startTime: Date.now(),
+          };
 
-        // Create a new quiz with the same topic and question count
-        const newQuiz = {
-          topic: quiz.topic,
-          questionCount: quiz.questionCount,
-          questions: quiz.questions,
-          userAnswers: Array(quiz.questions.length).fill(null),
-          currentQuestionIndex: 0,
-          currentScore: 0,
-          status: "incomplete",
-          timestamp: Date.now(),
-          startTime: Date.now(),
-        };
-
-        const newQuizId = await window.quizDB.saveQuiz(newQuiz);
-        window.location.href = `../home/Home.html?id=${newQuizId}`;
+          const newQuizId = await window.quizDB.saveQuiz(newQuiz);
+          window.location.href = `../home/Home.html?id=${newQuizId}`;
+        }
       } catch (error) {
         console.error("Failed to retake quiz:", error);
         showErrorMessage("Failed to retake quiz. Please try again.");

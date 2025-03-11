@@ -4,6 +4,9 @@ let maxQuestions = 0;
 let currentQuizId = null;
 let autoSaveTimer = null;
 
+// Make currentQuizId accessible globally
+window.currentQuizId = null;
+
 // Initialize app when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   if (window.quizDB && window.quizDB.db) {
@@ -154,6 +157,7 @@ This ensures high-quality, structured, and **accurate multiple-choice questions*
 
   try {
     currentQuizId = await window.quizDB.saveQuiz(quizData);
+    window.currentQuizId = currentQuizId; // Make it accessible globally
     console.log("Quiz saved with ID:", currentQuizId);
 
     // Start auto-save timer
@@ -259,6 +263,7 @@ async function resumeQuiz(quizId) {
     // Load quiz state
     questions = quizData.questions;
     currentQuizId = quizId;
+    window.currentQuizId = quizId; // Make it accessible globally
 
     // Initialize quiz module with the loaded data
     window.quizModule.initQuiz(
