@@ -3,7 +3,35 @@ let questions = [];
 let currentQuestionIndex = 0;
 let userAnswers = [];
 let currentScore = 0;
+
+let currentQuizId = null;
+let autoSaveTimer = null;
+
+// Expose functions to global scope for HTML onclick handlers
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.quizDB && window.quizDB.db) {
+    initializeApp(); // Start app if DB is ready
+  } else {
+    window.addEventListener("db-ready", initializeApp); // Wait for DB
+  }
+});
+
+// Add this function to handle initialization
+function initializeApp() {
+  console.log("Database initialized, app ready");
+
+  // Check URL parameters for quiz ID to resume
+  const urlParams = new URLSearchParams(window.location.search);
+  const quizId = urlParams.get("id");
+
+  if (quizId) {
+    resumeQuiz(Number.parseInt(quizId));
+    console.log(quizId);
+  }
+}
+
 let maxQuestions = 0;
+
 
 async function generateQuestions() {
   const topic = document.getElementById("topic").value;
@@ -77,6 +105,29 @@ async function generateQuestions() {
   userAnswers = Array(questions.length).fill(null);
   currentScore = 0;
 
+  // Create and save the quiz to IndexedDB
+  const quizData = {
+    topic: document.getElementById("topic").value,
+    questionCount: questions.length,
+    questions: questions,
+    userAnswers: userAnswers,
+    currentQuestionIndex: currentQuestionIndex,
+    currentScore: currentScore,
+    status: "incomplete",
+    timestamp: Date.now(),
+    startTime: Date.now(),
+  };
+
+  try {
+    currentQuizId = await window.quizDB.saveQuiz(quizData);
+    console.log("Quiz saved with ID:", currentQuizId);
+
+    // Start auto-save timer
+    startAutoSave();
+  } catch (error) {
+    console.error("Failed to save quiz:", error);
+  }
+
   document.getElementById("setup-section").classList.add("hidden");
   document.getElementById("quiz-section").classList.remove("hidden");
   document.getElementById("total-questions").textContent = questions.length;
@@ -85,6 +136,84 @@ async function generateQuestions() {
 
   // Reset background color
   showPreview();
+}
+
+// Auto-save quiz progress every 30 seconds
+function startAutoSave() {
+  // Clear any existing timer
+  if (autoSaveTimer) {
+    clearInterval(autoSaveTimer);
+  }
+
+  // Set up new timer
+  autoSaveTimer = setInterval(async () => {
+    if (currentQuizId) {
+      try {
+        const quizData = await window.quizDB.getQuiz(currentQuizId);
+        if (quizData && quizData.status === "incomplete") {
+          // Update with current state
+          quizData.userAnswers = userAnswers;
+          quizData.currentQuestionIndex = currentQuestionIndex;
+          quizData.currentScore = currentScore;
+          quizData.lastSaved = Date.now();
+
+          await window.quizDB.saveQuiz(quizData);
+          console.log("Quiz auto-saved");
+        }
+      } catch (error) {
+        console.error("Auto-save failed:", error);
+      }
+    }
+  }, 30000); // 30 seconds
+}
+
+// Stop auto-save timer
+function stopAutoSave() {
+  if (autoSaveTimer) {
+    clearInterval(autoSaveTimer);
+    autoSaveTimer = null;
+  }
+}
+
+// Resume a quiz from IndexedDB
+async function resumeQuiz(quizId) {
+  try {
+    const quizData = await window.quizDB.getQuiz(quizId);
+
+    if (!quizData) {
+      alert("Quiz not found!");
+      return;
+    }
+    console.log(quizData);
+
+    // Load quiz state
+    questions = quizData.questions;
+    userAnswers = quizData.userAnswers;
+    currentQuestionIndex = quizData.currentQuestionIndex;
+    currentScore = quizData.currentScore;
+    currentQuizId = quizId;
+
+    // Update UI
+    document.getElementById("topic").value = quizData.topic;
+    document.getElementById("question-count").value = quizData.questionCount;
+
+    document.getElementById("setup-section").classList.add("hidden");
+    document.getElementById("quiz-section").classList.remove("hidden");
+    document.getElementById("total-questions").textContent = questions.length;
+    document.getElementById("max-score").textContent = questions.length;
+    document.getElementById("current-score").textContent = currentScore;
+
+    displayCurrentQuestion();
+    updateNavigationButtons();
+
+    // Start auto-save
+    startAutoSave();
+
+    console.log("Quiz resumed:", quizId);
+  } catch (error) {
+    console.error("Failed to resume quiz:", error);
+    alert("Failed to resume quiz. Please try again.");
+  }
 }
 
 function parseQuestion(content) {
@@ -173,7 +302,7 @@ function displayCurrentQuestion() {
   container.innerHTML = questionHtml;
 }
 
-function selectAnswer(answer) {
+async function selectAnswer(answer) {
   // If already answered, don't allow changing
   if (userAnswers[currentQuestionIndex] !== null) return;
 
@@ -202,6 +331,24 @@ function selectAnswer(answer) {
 
   // Enable navigation to next question
   updateNavigationButtons();
+  // Save progress to IndexedDB
+  if (currentQuizId) {
+    try {
+      const quizData = await window.quizDB.getQuiz(currentQuizId);
+      if (quizData) {
+        quizData.userAnswers = userAnswers;
+        quizData.currentScore = currentScore;
+        quizData.lastSaved = Date.now();
+        quizData.question
+
+        await window.quizDB.saveQuiz(quizData);
+        console.log("Progress saved after answer");
+      }
+    } catch (error) {
+      console.error("Failed to save progress:", error);
+    }
+  }
+
 }
 
 // Hàm tạo hiệu ứng pháo hoa
@@ -341,12 +488,30 @@ function resetBackgroundColor() {
   );
 }
 
-function nextQuestion() {
+async function nextQuestion() {
   if (currentQuestionIndex < questions.length - 1) {
     currentQuestionIndex++;
     resetBackgroundColor(); // Reset màu khi chuyển câu hỏi
     displayCurrentQuestion();
     updateNavigationButtons();
+
+
+    // Save progress to IndexedDB
+    if (currentQuizId) {
+      try {
+        const quizData = await window.quizDB.getQuiz(currentQuizId);
+        if (quizData) {
+          quizData.currentQuestionIndex = currentQuestionIndex;
+          quizData.lastSaved = Date.now();
+
+          await window.quizDB.saveQuiz(quizData);
+          console.log("Progress saved after navigation");
+        }
+      } catch (error) {
+        console.error("Failed to save progress:", error);
+      }
+    }
+
   }
 }
 
@@ -389,7 +554,10 @@ function updateNavigationButtons() {
 }
 
 function resetQuiz() {
-  // Hide all sections first
+  // Stop auto-save
+  stopAutoSave();
+
+  // Hide all sections
   document.getElementById("results-section").classList.add("hidden");
   document.getElementById("quiz-section").classList.add("hidden");
   document.getElementById("preview-section").classList.add("hidden");
@@ -406,6 +574,7 @@ function resetQuiz() {
   currentQuestionIndex = 0;
   userAnswers = [];
   currentScore = 0;
+  currentQuizId = null;
 
   // Clear all containers
   document.getElementById("question-container").innerHTML = "";
@@ -415,6 +584,7 @@ function resetQuiz() {
   // Reset background color
   resetBackgroundColor();
 }
+
 
 function startQuiz() {
   if (questions.length === 0) {
@@ -448,6 +618,8 @@ function startQuiz() {
   displayCurrentQuestion();
   updateNavigationButtons();
 }
+async function finishQuiz() {
+
 
 function goBackToPreview() {
   // Ẩn trang kết quả
@@ -464,6 +636,7 @@ function finishQuiz() {
   // Hide all sections first
   document.getElementById("setup-section").classList.add("hidden");
   document.getElementById("preview-section").classList.add("hidden");
+
   document.getElementById("quiz-section").classList.add("hidden");
 
   // Show only results section
@@ -517,8 +690,84 @@ function finishQuiz() {
 
     detailedResults.innerHTML += questionHtml;
   });
+
+
+  // Stop auto-save
+  stopAutoSave();
+
+  // Update quiz status in IndexedDB
+  if (currentQuizId) {
+    try {
+      const quizData = await window.quizDB.getQuiz(currentQuizId);
+      if (quizData) {
+        quizData.status = "completed";
+        quizData.endTime = Date.now();
+        quizData.finalScore = currentScore;
+        quizData.scorePercentage = percentage;
+
+        await window.quizDB.saveQuiz(quizData);
+        console.log("Quiz marked as completed");
+      }
+    } catch (error) {
+      console.error("Failed to update quiz status:", error);
+    }
+  }
+
+  // Add a button to view history
+  const resultsSection = document.getElementById("results-section");
+  if (!document.getElementById("view-history-btn")) {
+    const historyBtn = document.createElement("button");
+    historyBtn.id = "view-history-btn";
+    historyBtn.className = "btn btn-secondary";
+    historyBtn.textContent = "Xem lịch sử";
+    historyBtn.onclick = () => (window.location.href = "history.html");
+
+    // Insert before the "Làm lại" button
+    const resetBtn = document.querySelector(
+      "#results-section button.btn-primary"
+    );
+    resultsSection.insertBefore(historyBtn, resetBtn);
+  }
 }
 
+
+
+// Add event listener for beforeunload to warn about leaving with unsaved progress
+window.addEventListener("beforeunload", (event) => {
+  if (
+    currentQuizId &&
+    questions.length > 0 &&
+    userAnswers.some((answer) => answer !== null) &&
+    !document.getElementById("results-section").classList.contains("hidden")
+  ) {
+    // Save progress one last time
+    const quizData = {
+      id: currentQuizId,
+      userAnswers: userAnswers,
+      currentQuestionIndex: currentQuestionIndex,
+      currentScore: currentScore,
+      lastSaved: Date.now(),
+    };
+
+    // Use synchronous storage to ensure it saves before page unload
+    try {
+      const transaction = window.quizDB.db.transaction(
+        [QUIZ_STORE],
+        "readwrite"
+      );
+      const store = transaction.objectStore(QUIZ_STORE);
+      store.put(quizData);
+    } catch (error) {
+      console.error("Failed to save on exit:", error);
+    }
+
+    // Show confirmation dialog
+    event.preventDefault();
+    event.returnValue =
+      "Bạn có bài kiểm tra đang làm dở. Tiến độ đã được lưu tự động và bạn có thể tiếp tục sau.";
+    return event.returnValue;
+  }
+});
 function showPreview() {
   // Hide all sections first
   document.getElementById("setup-section").classList.add("hidden");
