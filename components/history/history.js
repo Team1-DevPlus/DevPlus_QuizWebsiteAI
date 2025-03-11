@@ -18,6 +18,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadQuizHistory(filters = {}) {
   try {
     const quizzes = await window.quizDB.getQuizzes(filters);
+    
+    // Get current sort order
+    const sortSelect = document.getElementById("sort");
+    const sortOrder = sortSelect ? sortSelect.value : "date-desc";
+
+    // Apply sorting to all quizzes
+    switch (sortOrder) {
+      case "date-desc":
+        quizzes.sort((a, b) => b.timestamp - a.timestamp);
+        break;
+      case "date-asc":
+        quizzes.sort((a, b) => a.timestamp - b.timestamp);
+        break;
+      case "score-desc":
+        quizzes.sort((a, b) => {
+          const scoreA = a.status === "completed" ? (a.scorePercentage || (a.finalScore / a.questionCount) * 100) : -1;
+          const scoreB = b.status === "completed" ? (b.scorePercentage || (b.finalScore / b.questionCount) * 100) : -1;
+          return scoreB - scoreA;
+        });
+        break;
+      case "score-asc":
+        quizzes.sort((a, b) => {
+          const scoreA = a.status === "completed" ? (a.scorePercentage || (a.finalScore / a.questionCount) * 100) : 999;
+          const scoreB = b.status === "completed" ? (b.scorePercentage || (b.finalScore / b.questionCount) * 100) : 999;
+          return scoreA - scoreB;
+        });
+        break;
+    }
 
     // Update stats
     updateStats(quizzes);
@@ -288,20 +316,14 @@ function addQuizActionListeners() {
 
 // Set up event listeners for filters
 function setupFilterListeners() {
-  const categorySelect = document.getElementById("category");
   const dateRangeSelect = document.getElementById("date-range");
   const sortSelect = document.getElementById("sort");
 
   const applyFilters = async () => {
     const filters = {};
 
-    // Apply category filter
-    if (categorySelect.value !== "all") {
-      filters.topic = categorySelect.value;
-    }
-
     // Apply date range filter
-    if (dateRangeSelect.value !== "all") {
+    if (dateRangeSelect && dateRangeSelect.value !== "all") {
       const now = Date.now();
       let startTime;
 
@@ -320,65 +342,13 @@ function setupFilterListeners() {
       filters.startTime = startTime;
     }
 
-    // Load quizzes with filters
-    const quizzes = await window.quizDB.getQuizzes(filters);
-
-    // Apply sorting
-    switch (sortSelect.value) {
-      case "date-desc":
-        quizzes.sort((a, b) => b.timestamp - a.timestamp);
-        break;
-      case "date-asc":
-        quizzes.sort((a, b) => a.timestamp - b.timestamp);
-        break;
-      case "score-desc":
-        quizzes.sort((a, b) => {
-          const scoreA =
-            a.status === "completed"
-              ? a.scorePercentage || (a.finalScore / a.questionCount) * 100
-              : 0;
-          const scoreB =
-            b.status === "completed"
-              ? b.scorePercentage || (b.finalScore / b.questionCount) * 100
-              : 0;
-          return scoreB - scoreA;
-        });
-        break;
-      case "score-asc":
-        quizzes.sort((a, b) => {
-          const scoreA =
-            a.status === "completed"
-              ? a.scorePercentage || (a.finalScore / a.questionCount) * 100
-              : 0;
-          const scoreB =
-            b.status === "completed"
-              ? b.scorePercentage || (b.finalScore / b.questionCount) * 100
-              : 0;
-          return scoreA - scoreB;
-        });
-        break;
-    }
-
-    // Update stats
-    updateStats(quizzes);
-
-    // Separate quizzes by status
-    const incompleteQuizzes = quizzes.filter(
-      (quiz) => quiz.status === "incomplete"
-    );
-    const completedQuizzes = quizzes.filter(
-      (quiz) => quiz.status === "completed"
-    );
-
-    // Render both lists
-    renderQuizList("incomplete-list", incompleteQuizzes);
-    renderQuizList("completed-list", completedQuizzes);
+    // Load quizzes with filters and current sort order
+    await loadQuizHistory(filters);
   };
 
   // Add event listeners
-  categorySelect.addEventListener("change", applyFilters);
-  dateRangeSelect.addEventListener("change", applyFilters);
-  sortSelect.addEventListener("change", applyFilters);
+  if (dateRangeSelect) dateRangeSelect.addEventListener("change", applyFilters);
+  if (sortSelect) sortSelect.addEventListener("change", applyFilters);
 }
 
 // Show error message
