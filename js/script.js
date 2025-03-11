@@ -32,7 +32,6 @@ function initializeApp() {
 
 let maxQuestions = 0;
 
-
 async function generateQuestions() {
   const topic = document.getElementById("topic").value;
   const count = Number.parseInt(
@@ -45,7 +44,7 @@ async function generateQuestions() {
   }
 
   maxQuestions = count;
-  
+
   // Hiển thị loading
   document.getElementById("loading").classList.remove("hidden");
 
@@ -133,7 +132,11 @@ async function generateQuestions() {
   document.getElementById("total-questions").textContent = questions.length;
   document.getElementById("max-score").textContent = questions.length;
   document.getElementById("current-score").textContent = "0";
-
+  localStorage.setItem("questions", JSON.stringify(quizData));
+  localStorage.setItem(
+    "userAnswers",
+    JSON.stringify(Array(filteredQuestions.length).fill(null))
+  );
   // Reset background color
   showPreview();
 }
@@ -339,7 +342,7 @@ async function selectAnswer(answer) {
         quizData.userAnswers = userAnswers;
         quizData.currentScore = currentScore;
         quizData.lastSaved = Date.now();
-        quizData.question
+        quizData.question;
 
         await window.quizDB.saveQuiz(quizData);
         console.log("Progress saved after answer");
@@ -348,7 +351,6 @@ async function selectAnswer(answer) {
       console.error("Failed to save progress:", error);
     }
   }
-
 }
 
 // Hàm tạo hiệu ứng pháo hoa
@@ -495,7 +497,6 @@ async function nextQuestion() {
     displayCurrentQuestion();
     updateNavigationButtons();
 
-
     // Save progress to IndexedDB
     if (currentQuizId) {
       try {
@@ -511,7 +512,6 @@ async function nextQuestion() {
         console.error("Failed to save progress:", error);
       }
     }
-
   }
 }
 
@@ -585,7 +585,6 @@ function resetQuiz() {
   resetBackgroundColor();
 }
 
-
 function startQuiz() {
   if (questions.length === 0) {
     alert("Không có câu hỏi nào để làm bài. Vui lòng tạo câu hỏi trước!");
@@ -619,7 +618,6 @@ function startQuiz() {
   updateNavigationButtons();
 }
 async function finishQuiz() {
-
   // Hide all sections first
   document.getElementById("setup-section").classList.add("hidden");
   document.getElementById("preview-section").classList.add("hidden");
@@ -678,7 +676,6 @@ async function finishQuiz() {
     detailedResults.innerHTML += questionHtml;
   });
 
-
   // Stop auto-save
   stopAutoSave();
 
@@ -716,8 +713,6 @@ async function finishQuiz() {
     resultsSection.insertBefore(historyBtn, resetBtn);
   }
 }
-
-
 
 // Add event listener for beforeunload to warn about leaving with unsaved progress
 window.addEventListener("beforeunload", (event) => {
@@ -847,12 +842,12 @@ async function replaceQuestion(index) {
 }
 
 async function addNewQuestion() {
-   if (questions.length >= maxQuestions) {
-     alert(
-       `Bài quiz chỉ có tối đa ${maxQuestions} câu hỏi. Không thể thêm câu hỏi mới!`
-     );
-     return;
-   }
+  if (questions.length >= maxQuestions) {
+    alert(
+      `Bài quiz chỉ có tối đa ${maxQuestions} câu hỏi. Không thể thêm câu hỏi mới!`
+    );
+    return;
+  }
   const topic = document.getElementById("topic").value;
 
   const apiUrl =
@@ -900,4 +895,3 @@ async function addNewQuestion() {
     alert("Không thể thêm câu hỏi. Vui lòng thử lại!");
   }
 }
-
