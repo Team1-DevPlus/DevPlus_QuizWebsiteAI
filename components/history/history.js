@@ -226,6 +226,12 @@ function updateStats(quizzes) {
 
 // Add event listeners to quiz action buttons
 function addQuizActionListeners() {
+  // Remove existing event listeners by cloning and replacing elements
+  document.querySelectorAll(".resume-quiz, .retake-quiz, .delete-quiz").forEach(button => {
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+  });
+
   // Resume quiz buttons
   document.querySelectorAll(".resume-quiz").forEach((button) => {
     button.addEventListener("click", async (event) => {
