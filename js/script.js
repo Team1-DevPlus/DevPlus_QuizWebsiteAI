@@ -45,7 +45,7 @@ async function generateQuestions() {
   }
 
   maxQuestions = count;
-  
+
   // Hiển thị loading
   document.getElementById("loading").classList.remove("hidden");
 
@@ -620,6 +620,19 @@ function startQuiz() {
 }
 async function finishQuiz() {
 
+
+function goBackToPreview() {
+  // Ẩn trang kết quả
+  document.getElementById("results-section").classList.add("hidden");
+
+  // Hiển thị trang xem trước
+  document.getElementById("preview-section").classList.remove("hidden");
+
+  // Cập nhật lại danh sách câu hỏi trong trang xem trước
+  showPreview();
+}
+
+function finishQuiz() {
   // Hide all sections first
   document.getElementById("setup-section").classList.add("hidden");
   document.getElementById("preview-section").classList.add("hidden");
@@ -847,12 +860,12 @@ async function replaceQuestion(index) {
 }
 
 async function addNewQuestion() {
-   if (questions.length >= maxQuestions) {
-     alert(
-       `Bài quiz chỉ có tối đa ${maxQuestions} câu hỏi. Không thể thêm câu hỏi mới!`
-     );
-     return;
-   }
+  if (questions.length >= maxQuestions) {
+    alert(
+      `Bài quiz chỉ có tối đa ${maxQuestions} câu hỏi. Không thể thêm câu hỏi mới!`
+    );
+    return;
+  }
   const topic = document.getElementById("topic").value;
 
   const apiUrl =
@@ -900,4 +913,3 @@ async function addNewQuestion() {
     alert("Không thể thêm câu hỏi. Vui lòng thử lại!");
   }
 }
-
