@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadQuizHistory(filters = {}) {
   try {
     const quizzes = await window.quizDB.getQuizzes(filters);
-    
+
     // Get current sort order
     const sortSelect = document.getElementById("sort");
     const sortOrder = sortSelect ? sortSelect.value : "date-desc";
@@ -33,15 +33,27 @@ async function loadQuizHistory(filters = {}) {
         break;
       case "score-desc":
         quizzes.sort((a, b) => {
-          const scoreA = a.status === "completed" ? (a.scorePercentage || (a.finalScore / a.questionCount) * 100) : -1;
-          const scoreB = b.status === "completed" ? (b.scorePercentage || (b.finalScore / b.questionCount) * 100) : -1;
+          const scoreA =
+            a.status === "completed"
+              ? a.scorePercentage || (a.finalScore / a.questionCount) * 100
+              : -1;
+          const scoreB =
+            b.status === "completed"
+              ? b.scorePercentage || (b.finalScore / b.questionCount) * 100
+              : -1;
           return scoreB - scoreA;
         });
         break;
       case "score-asc":
         quizzes.sort((a, b) => {
-          const scoreA = a.status === "completed" ? (a.scorePercentage || (a.finalScore / a.questionCount) * 100) : 999;
-          const scoreB = b.status === "completed" ? (b.scorePercentage || (b.finalScore / b.questionCount) * 100) : 999;
+          const scoreA =
+            a.status === "completed"
+              ? a.scorePercentage || (a.finalScore / a.questionCount) * 100
+              : 999;
+          const scoreB =
+            b.status === "completed"
+              ? b.scorePercentage || (b.finalScore / b.questionCount) * 100
+              : 999;
           return scoreA - scoreB;
         });
         break;
@@ -105,7 +117,7 @@ function renderQuizList(containerId, quizzes) {
     const formattedDate = date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
-      day: "numeric"
+      day: "numeric",
     });
 
     // Calculate score badge class
@@ -255,10 +267,12 @@ function updateStats(quizzes) {
 // Add event listeners to quiz action buttons
 function addQuizActionListeners() {
   // Remove existing event listeners by cloning and replacing elements
-  document.querySelectorAll(".resume-quiz, .retake-quiz, .delete-quiz").forEach(button => {
-    const newButton = button.cloneNode(true);
-    button.parentNode.replaceChild(newButton, button);
-  });
+  document
+    .querySelectorAll(".resume-quiz, .retake-quiz, .delete-quiz")
+    .forEach((button) => {
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+    });
 
   // Resume quiz buttons
   document.querySelectorAll(".resume-quiz").forEach((button) => {

@@ -1066,7 +1066,7 @@ function showPreview() {
         <h3 class="text-lg font-semibold text-gray-800 mb-3">${index + 1}. ${
       q.question
     }</h3>
-        
+
         ${questionContent}
 
         <!-- Action Buttons -->
@@ -1447,9 +1447,9 @@ async function finishQuiz() {
                 <li class="p-1 bg-white rounded border ${
                   isMatchCorrect ? "border-green-300" : "border-red-300"
                 } flex items-center">
-                  <span class="font-semibold mr-1">${match.left}</span> ↔ 
-                  <span class="font-semibold mx-1">${match.right}</span>: 
-                  <span class="ml-1">${leftItem?.substring(3) || ""}</span> ↔ 
+                  <span class="font-semibold mr-1">${match.left}</span> ↔
+                  <span class="font-semibold mx-1">${match.right}</span>:
+                  <span class="ml-1">${leftItem?.substring(3) || ""}</span> ↔
                   <span class="ml-1">${rightItem?.substring(3) || ""}</span>
                   ${
                     isMatchCorrect
@@ -1463,7 +1463,7 @@ async function finishQuiz() {
                 : '<li class="text-red-500">Not answered</li>'
             }
           </ul>
-          
+
           <p class="font-semibold text-gray-700 mt-3 mb-2">Correct matches:</p>
           <ul class="space-y-1">
             ${correctMatches
@@ -1477,9 +1477,9 @@ async function finishQuiz() {
 
                 return `
                 <li class="p-1 bg-white rounded border border-green-300 flex items-center">
-                  <span class="font-semibold mr-1">${match.left}</span> ↔ 
-                  <span class="font-semibold mx-1">${match.right}</span>: 
-                  <span class="ml-1">${leftItem?.substring(3) || ""}</span> ↔ 
+                  <span class="font-semibold mr-1">${match.left}</span> ↔
+                  <span class="font-semibold mx-1">${match.right}</span>:
+                  <span class="ml-1">${leftItem?.substring(3) || ""}</span> ↔
                   <span class="ml-1">${rightItem?.substring(3) || ""}</span>
                 </li>
               `;
@@ -1487,7 +1487,7 @@ async function finishQuiz() {
               .join("")}
           </ul>
         </div>
-        
+
         <div class="mt-3">
           <p class="font-semibold text-gray-700 mb-1">Explanations:</p>
           <ul class="text-gray-800 italic space-y-1">
@@ -1506,7 +1506,7 @@ async function finishQuiz() {
             : "bg-red-50 border-red-100"
         }">
           <h4 class="text-lg font-semibold text-gray-900 flex items-center">
-            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 mr-3 font-bold">
+            <span class="flex items-center justify-center w-8 h-8 rounded-full text-2xl text-blue-800 mr-3 font-bold">
               ${index + 1}
             </span>
             ${question.question}
@@ -1523,7 +1523,7 @@ async function finishQuiz() {
             }
           </span>
         </div>
-        
+
         <!-- Question content -->
         <div class="p-4">
           ${resultHtml}
