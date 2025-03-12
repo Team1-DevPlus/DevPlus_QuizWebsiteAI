@@ -7,6 +7,18 @@ let autoSaveTimer = null;
 // Make currentQuizId accessible globally
 window.currentQuizId = null;
 
+// Add HTML escaping function to prevent HTML injection issues
+function escapeHtml(text) {
+  if (!text) return "";
+
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // Helper function to check if HTML elements exist
 function checkElementsExist() {
   const elements = [
@@ -26,11 +38,11 @@ function checkElementsExist() {
     "current-question",
     "total-questions",
     "current-score",
-    "max-score"
+    "max-score",
   ];
-  
+
   console.log("Checking if HTML elements exist:");
-  elements.forEach(id => {
+  elements.forEach((id) => {
     const element = document.getElementById(id);
     console.log(`- ${id}: ${element ? "exists" : "NOT FOUND"}`);
   });
@@ -47,15 +59,22 @@ function checkFunctionsExist() {
     "replaceQuestion",
     "addNewQuestion",
     "finishQuiz",
-    "goHome"
+    "goHome",
   ];
-  
+
   console.log("Checking if JavaScript functions exist in window object:");
-  functions.forEach(funcName => {
-    console.log(`- ${funcName}: ${typeof window[funcName] === "function" ? "exists" : "NOT FOUND"}`);
+  functions.forEach((funcName) => {
+    console.log(
+      `- ${funcName}: ${
+        typeof window[funcName] === "function" ? "exists" : "NOT FOUND"
+      }`
+    );
   });
-  
-  console.log("Checking if quizModule exists:", window.quizModule ? "exists" : "NOT FOUND");
+
+  console.log(
+    "Checking if quizModule exists:",
+    window.quizModule ? "exists" : "NOT FOUND"
+  );
   if (window.quizModule) {
     const moduleFunctions = [
       "initQuiz",
@@ -65,12 +84,18 @@ function checkFunctionsExist() {
       "nextQuestion",
       "previousQuestion",
       "updateNavigationButtons",
-      "resetBackgroundColor"
+      "resetBackgroundColor",
     ];
-    
+
     console.log("Checking if quizModule functions exist:");
-    moduleFunctions.forEach(funcName => {
-      console.log(`- ${funcName}: ${typeof window.quizModule[funcName] === "function" ? "exists" : "NOT FOUND"}`);
+    moduleFunctions.forEach((funcName) => {
+      console.log(
+        `- ${funcName}: ${
+          typeof window.quizModule[funcName] === "function"
+            ? "exists"
+            : "NOT FOUND"
+        }`
+      );
     });
   }
 }
@@ -80,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("DOMContentLoaded event fired");
   checkElementsExist();
   checkFunctionsExist();
-  
+
   if (window.quizDB && window.quizDB.db) {
     initializeApp(); // Start app if DB is ready
   } else {
@@ -108,23 +133,38 @@ function checkSectionVisibility() {
   const previewSection = document.getElementById("preview-section");
   const quizSection = document.getElementById("quiz-section");
   const resultsSection = document.getElementById("results-section");
-  
+
   console.log("Section visibility:");
-  console.log("- setup-section:", setupSection ? !setupSection.classList.contains("hidden") : "not found");
-  console.log("- preview-section:", previewSection ? !previewSection.classList.contains("hidden") : "not found");
-  console.log("- quiz-section:", quizSection ? !quizSection.classList.contains("hidden") : "not found");
-  console.log("- results-section:", resultsSection ? !resultsSection.classList.contains("hidden") : "not found");
+  console.log(
+    "- setup-section:",
+    setupSection ? !setupSection.classList.contains("hidden") : "not found"
+  );
+  console.log(
+    "- preview-section:",
+    previewSection ? !previewSection.classList.contains("hidden") : "not found"
+  );
+  console.log(
+    "- quiz-section:",
+    quizSection ? !quizSection.classList.contains("hidden") : "not found"
+  );
+  console.log(
+    "- results-section:",
+    resultsSection ? !resultsSection.classList.contains("hidden") : "not found"
+  );
 }
 
 // Generate questions using API
 async function generateQuestions() {
-  const topic = document.getElementById("topic").value;
+  // Get the raw topic value and escape HTML in it
+  const rawTopic = document.getElementById("topic").value;
+  const topic = escapeHtml(rawTopic);
+
   const level = document.getElementById("difficulty").value;
   const count = Number.parseInt(
     document.getElementById("question-count").value
   );
 
-  if (!topic || isNaN(count) || count < 1 || count > 20) {
+  if (!rawTopic || isNaN(count) || count < 1 || count > 20) {
     alert("Please enter a valid topic and number of questions (1-20)!");
     return;
   }
@@ -155,50 +195,49 @@ async function generateQuestions() {
   // Distribute questions among selected types
   const distribution = distributeQuestions(count, questionTypes);
   console.log("Question distribution:", distribution);
-  
+
   try {
     let allQuestions = [];
-    
+
     // Generate multiple choice questions if selected
     if (multipleChoice && distribution["multiple-choice"] > 0) {
       console.log("Generating multiple choice questions...");
       const mcQuestions = await generateMultipleChoiceQuestions(
-        topic, 
-        level, 
+        topic,
+        level,
         distribution["multiple-choice"]
       );
       console.log("Multiple choice questions generated:", mcQuestions.length);
       allQuestions = allQuestions.concat(mcQuestions);
     }
-    
+
     // Generate drag and drop questions if selected
     if (dragAndDrop && distribution["drag-and-drop"] > 0) {
       console.log("Generating drag and drop questions...");
       const ddQuestions = await generateDragAndDropQuestions(
-        topic, 
-        level, 
+        topic,
+        level,
         distribution["drag-and-drop"]
       );
       console.log("Drag and drop questions generated:", ddQuestions.length);
       allQuestions = allQuestions.concat(ddQuestions);
     }
-    
+
     // Generate match answer questions if selected
     if (matchAnswer && distribution["match-answer"] > 0) {
       console.log("Generating match answer questions...");
       const maQuestions = await generateMatchAnswerQuestions(
-        topic, 
-        level, 
+        topic,
+        level,
         distribution["match-answer"]
       );
       console.log("Match answer questions generated:", maQuestions.length);
       allQuestions = allQuestions.concat(maQuestions);
     }
-    
+
     // Shuffle questions to mix different types
     questions = shuffleArray(allQuestions);
     console.log("Total questions generated:", questions.length);
-    
   } catch (error) {
     console.error("Error generating questions:", error);
   }
@@ -218,7 +257,8 @@ async function generateQuestions() {
 
   // Create and save the quiz to IndexedDB
   const quizData = {
-    topic: document.getElementById("topic").value,
+    topic: rawTopic, // Store the original topic for display
+    escapedTopic: topic, // Store the escaped topic for API calls
     questionCount: questions.length,
     questions: questions,
     userAnswers: userAnswers,
@@ -242,7 +282,7 @@ async function generateQuestions() {
 
   console.log("Hiding setup section...");
   document.getElementById("setup-section").classList.add("hidden");
-  
+
   // Initialize quiz module
   window.quizModule.initQuiz(
     questions,
@@ -250,12 +290,12 @@ async function generateQuestions() {
     currentQuestionIndex,
     currentScore
   );
-  
+
   // Update UI elements for quiz section
   document.getElementById("total-questions").textContent = questions.length;
   document.getElementById("max-score").textContent = questions.length;
   document.getElementById("current-score").textContent = "0";
-  
+
   // Make sure quiz section is hidden
   document.getElementById("quiz-section").classList.add("hidden");
   document.getElementById("results-section").classList.add("hidden");
@@ -270,14 +310,14 @@ async function generateQuestions() {
   // Show preview section
   console.log("Showing preview section...");
   document.getElementById("preview-section").classList.remove("hidden");
-  
+
   // Check visibility of sections
   checkSectionVisibility();
-  
+
   // Show preview
   showPreview();
   console.log("Preview should be visible now");
-  
+
   // Check visibility again after showPreview
   checkSectionVisibility();
 }
@@ -286,24 +326,24 @@ async function generateQuestions() {
 function distributeQuestions(totalCount, types) {
   const distribution = {};
   const typeCount = types.length;
-  
+
   // Initialize all types with 0
-  types.forEach(type => {
+  types.forEach((type) => {
     distribution[type] = 0;
   });
-  
+
   // Basic distribution - divide evenly
   const baseCount = Math.floor(totalCount / typeCount);
-  types.forEach(type => {
+  types.forEach((type) => {
     distribution[type] = baseCount;
   });
-  
+
   // Distribute remaining questions
-  let remaining = totalCount - (baseCount * typeCount);
+  let remaining = totalCount - baseCount * typeCount;
   for (let i = 0; i < remaining; i++) {
     distribution[types[i % typeCount]]++;
   }
-  
+
   return distribution;
 }
 
@@ -319,7 +359,12 @@ function shuffleArray(array) {
 
 // Generate multiple choice questions
 async function generateMultipleChoiceQuestions(topic, level, count) {
-  console.log("generateMultipleChoiceQuestions called with", topic, level, count);
+  console.log(
+    "generateMultipleChoiceQuestions called with",
+    topic,
+    level,
+    count
+  );
   const apiUrl =
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDijs4L5KVp8iU09EZIAfZALfxGD4q7epU";
 
@@ -379,29 +424,38 @@ Reason: "Au" is the chemical symbol for gold, derived from the Latin word "Aurum
 
     const data = await response.json();
     console.log("API response received for multiple choice questions");
-    
-    if (!data || !data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+
+    if (
+      !data ||
+      !data.candidates ||
+      !data.candidates[0] ||
+      !data.candidates[0].content ||
+      !data.candidates[0].content.parts ||
+      !data.candidates[0].content.parts[0]
+    ) {
       console.error("Invalid API response format:", data);
       return [];
     }
-    
+
     const content = data.candidates[0].content.parts[0].text || "";
     console.log("Content received:", content.substring(0, 100) + "...");
-    
+
     const questionBlocks = content
       .split("---")
       .map((q) => q.trim())
       .filter(Boolean);
     console.log("Question blocks extracted:", questionBlocks.length);
 
-    const parsedQuestions = questionBlocks.map((block, index) => {
-      console.log(`Parsing question block ${index + 1}`);
-      return parseMultipleChoiceQuestion(block);
-    }).filter(Boolean);
+    const parsedQuestions = questionBlocks
+      .map((block, index) => {
+        console.log(`Parsing question block ${index + 1}`);
+        return parseMultipleChoiceQuestion(block);
+      })
+      .filter(Boolean);
     console.log("Parsed questions:", parsedQuestions.length);
-    
+
     // Add type property to each question
-    return parsedQuestions.map(q => ({...q, type: "multiple-choice"}));
+    return parsedQuestions.map((q) => ({ ...q, type: "multiple-choice" }));
   } catch (error) {
     console.error("Error in generateMultipleChoiceQuestions:", error);
     return [];
@@ -477,10 +531,12 @@ Reason: The correct chronological order is: Pearl Harbor attack (December 1941),
     .map((q) => q.trim())
     .filter(Boolean);
 
-  const parsedQuestions = questionBlocks.map(parseDragAndDropQuestion).filter(Boolean);
-  
+  const parsedQuestions = questionBlocks
+    .map(parseDragAndDropQuestion)
+    .filter(Boolean);
+
   // Add type property to each question
-  return parsedQuestions.map(q => ({...q, type: "drag-and-drop"}));
+  return parsedQuestions.map((q) => ({ ...q, type: "drag-and-drop" }));
 }
 
 // Generate match answer questions
@@ -566,23 +622,28 @@ Explanations:
     .map((q) => q.trim())
     .filter(Boolean);
 
-  const parsedQuestions = questionBlocks.map(parseMatchAnswerQuestion).filter(Boolean);
-  
+  const parsedQuestions = questionBlocks
+    .map(parseMatchAnswerQuestion)
+    .filter(Boolean);
+
   // Add type property to each question
-  return parsedQuestions.map(q => ({...q, type: "match-answer"}));
+  return parsedQuestions.map((q) => ({ ...q, type: "match-answer" }));
 }
 
 // Parse multiple choice question from API response
 function parseMultipleChoiceQuestion(content) {
-  console.log("parseMultipleChoiceQuestion called with content length:", content.length);
-  
+  console.log(
+    "parseMultipleChoiceQuestion called with content length:",
+    content.length
+  );
+
   const lines = content
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line);
-  
+
   console.log("Lines extracted:", lines.length);
-  
+
   let question = "";
   const choices = [];
   let correctAnswer = "";
@@ -590,17 +651,23 @@ function parseMultipleChoiceQuestion(content) {
 
   lines.forEach((line) => {
     if (line.startsWith("Question:")) {
-      question = line.replace("Question:", "").trim();
+      // Escape HTML in the question text
+      question = escapeHtml(line.replace("Question:", "").trim());
     } else if (/^[A-D]\./.test(line)) {
-      choices.push(line);
+      // Escape HTML in the choices
+      choices.push(escapeHtml(line));
     } else if (line.startsWith("Correct answer:")) {
       correctAnswer = line.replace("Correct answer:", "").trim();
     } else if (line.startsWith("Reason:")) {
-      reason = line.replace("Reason:", "").trim();
+      // Escape HTML in the reason text
+      reason = escapeHtml(line.replace("Reason:", "").trim());
     }
   });
 
-  console.log("Parsed question:", question ? question.substring(0, 30) + "..." : "none");
+  console.log(
+    "Parsed question:",
+    question ? question.substring(0, 30) + "..." : "none"
+  );
   console.log("Choices:", choices.length);
   console.log("Correct answer:", correctAnswer);
   console.log("Reason:", reason ? "present" : "none");
@@ -628,31 +695,36 @@ function parseDragAndDropQuestion(content) {
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line);
-  
+
   let question = "";
   const items = [];
   let correctSequence = "";
   let reason = "";
   let collectingItems = false;
-  
+
   lines.forEach((line) => {
     if (line.startsWith("Question:")) {
-      question = line.replace("Question:", "").trim();
+      // Escape HTML in the question text
+      question = escapeHtml(line.replace("Question:", "").trim());
     } else if (line === "Items:") {
       collectingItems = true;
     } else if (collectingItems && line.startsWith("-")) {
-      items.push(line.substring(1).trim());
+      // Escape HTML in the items
+      items.push(escapeHtml(line.substring(1).trim()));
     } else if (line.startsWith("Correct sequence:")) {
       collectingItems = false;
       correctSequence = line.replace("Correct sequence:", "").trim();
     } else if (line.startsWith("Reason:")) {
-      reason = line.replace("Reason:", "").trim();
+      // Escape HTML in the reason text
+      reason = escapeHtml(line.replace("Reason:", "").trim());
     }
   });
 
   // Convert sequence string to array of indices
-  const sequenceArray = correctSequence.split(",").map(num => parseInt(num.trim()));
-  
+  const sequenceArray = correctSequence
+    .split(",")
+    .map((num) => parseInt(num.trim()));
+
   return question && items.length > 0 && sequenceArray.length > 0
     ? { question, items, correctSequence: sequenceArray, reason }
     : null;
@@ -664,20 +736,21 @@ function parseMatchAnswerQuestion(content) {
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line);
-  
+
   let question = "";
   const columnA = [];
   const columnB = [];
   let correctMatches = "";
   const explanations = [];
-  
+
   let collectingColumnA = false;
   let collectingColumnB = false;
   let collectingExplanations = false;
-  
+
   lines.forEach((line) => {
     if (line.startsWith("Question:")) {
-      question = line.replace("Question:", "").trim();
+      // Escape HTML in the question text
+      question = escapeHtml(line.replace("Question:", "").trim());
     } else if (line === "Column A:") {
       collectingColumnA = true;
       collectingColumnB = false;
@@ -687,9 +760,11 @@ function parseMatchAnswerQuestion(content) {
       collectingColumnB = true;
       collectingExplanations = false;
     } else if (collectingColumnA && /^[A-D]\./.test(line)) {
-      columnA.push(line);
+      // Escape HTML in column A items
+      columnA.push(escapeHtml(line));
     } else if (collectingColumnB && /^[1-4]\./.test(line)) {
-      columnB.push(line);
+      // Escape HTML in column B items
+      columnB.push(escapeHtml(line));
     } else if (line.startsWith("Correct matches:")) {
       collectingColumnA = false;
       collectingColumnB = false;
@@ -697,17 +772,21 @@ function parseMatchAnswerQuestion(content) {
     } else if (line === "Explanations:") {
       collectingExplanations = true;
     } else if (collectingExplanations && line.startsWith("-")) {
-      explanations.push(line.substring(1).trim());
+      // Escape HTML in explanations
+      explanations.push(escapeHtml(line.substring(1).trim()));
     }
   });
 
   // Parse matches into a structured format
-  const matches = correctMatches.split(",").map(match => {
+  const matches = correctMatches.split(",").map((match) => {
     const [left, right] = match.trim().split("-");
     return { left, right };
   });
-  
-  return question && columnA.length > 0 && columnB.length > 0 && matches.length > 0
+
+  return question &&
+    columnA.length > 0 &&
+    columnB.length > 0 &&
+    matches.length > 0
     ? { question, columnA, columnB, matches, explanations }
     : null;
 }
@@ -848,7 +927,7 @@ function startQuiz() {
   // Show only quiz section
   console.log("Showing quiz section");
   document.getElementById("quiz-section").classList.remove("hidden");
-  
+
   // Check visibility
   checkSectionVisibility();
 
@@ -875,7 +954,7 @@ function startQuiz() {
   window.quizModule.displayCurrentQuestion();
   window.quizModule.updateNavigationButtons();
   console.log("Quiz started successfully");
-  
+
   // Check visibility again
   checkSectionVisibility();
 }
@@ -891,7 +970,7 @@ function showPreview() {
   // Show only preview section
   document.getElementById("preview-section").classList.remove("hidden");
   console.log("Preview section should be visible now");
-  
+
   // Check visibility
   checkSectionVisibility();
 
@@ -900,24 +979,28 @@ function showPreview() {
     console.error("Preview container not found!");
     return;
   }
-  
+
   previewContainer.innerHTML = "";
   console.log("Rendering", questions.length, "questions in preview");
 
   questions.forEach((q, index) => {
     console.log("Rendering question", index + 1, "type:", q.type);
-    let questionContent = '';
-    
+    let questionContent = "";
+
     // Generate different preview content based on question type
     if (q.type === "multiple-choice") {
       // Multiple choice question preview - hide correct answer
       questionContent = `
         <div class="mt-2 space-y-2">
-          ${q.choices.map(choice => `
+          ${q.choices
+            .map(
+              (choice) => `
             <div class="p-2 bg-white rounded border border-gray-200">
               ${choice}
             </div>
-          `).join('')}
+          `
+            )
+            .join("")}
         </div>
       `;
     } else if (q.type === "drag-and-drop") {
@@ -926,11 +1009,15 @@ function showPreview() {
         <div class="mt-2">
           <p class="text-sm text-gray-600 mb-2">Items to arrange:</p>
           <div class="space-y-2">
-            ${q.items.map((item, i) => `
+            ${q.items
+              .map(
+                (item, i) => `
               <div class="p-2 bg-white rounded border border-gray-200">
                 ${item}
               </div>
-            `).join('')}
+            `
+              )
+              .join("")}
           </div>
           <p class="text-sm text-gray-600 mt-3 mb-1">Type: Sequence Ordering</p>
         </div>
@@ -942,21 +1029,29 @@ function showPreview() {
           <div>
             <p class="text-sm text-gray-600 mb-2">Column A:</p>
             <div class="space-y-2">
-              ${q.columnA.map(item => `
+              ${q.columnA
+                .map(
+                  (item) => `
                 <div class="p-2 bg-white rounded border border-gray-200">
                   ${item}
                 </div>
-              `).join('')}
+              `
+                )
+                .join("")}
             </div>
           </div>
           <div>
             <p class="text-sm text-gray-600 mb-2">Column B:</p>
             <div class="space-y-2">
-              ${q.columnB.map(item => `
+              ${q.columnB
+                .map(
+                  (item) => `
                 <div class="p-2 bg-white rounded border border-gray-200">
                   ${item}
                 </div>
-              `).join('')}
+              `
+                )
+                .join("")}
             </div>
           </div>
           <p class="text-sm text-gray-600 mt-2 col-span-2">Type: Matching</p>
@@ -968,7 +1063,9 @@ function showPreview() {
 
     const questionHtml = `
       <div class="preview-question p-5 bg-gray-100 shadow-lg rounded-xl border border-gray-300 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-3">${index + 1}. ${q.question}</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">${index + 1}. ${
+      q.question
+    }</h3>
         
         ${questionContent}
 
@@ -1000,9 +1097,9 @@ function showPreview() {
       addQuestionButton.style.display = "inline-block";
     }
   }
-  
+
   console.log("Preview rendering complete");
-  
+
   // Check visibility again
   checkSectionVisibility();
 }
@@ -1015,7 +1112,7 @@ function deleteQuestion(index) {
 
 // Replace question with AI-generated one
 async function replaceQuestion(index) {
-  const topic = document.getElementById("topic").value;
+  const topic = escapeHtml(document.getElementById("topic").value);
 
   const existingQuestions = questions.map((q) => q.question);
 
@@ -1093,7 +1190,7 @@ async function addNewQuestion() {
     );
     return;
   }
-  const topic = document.getElementById("topic").value;
+  const topic = escapeHtml(document.getElementById("topic").value);
 
   const apiUrl =
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDijs4L5KVp8iU09EZIAfZALfxGD4q7epU";
@@ -1163,17 +1260,17 @@ async function finishQuiz() {
   const percentage = (currentScore / questions.length) * 100;
   const scoreCircle = document.getElementById("score-circle");
   const circumference = 2 * Math.PI * 45; // 2πr where r=45
-  
+
   // Set initial state (full offset = no fill)
   scoreCircle.style.strokeDasharray = circumference;
   scoreCircle.style.strokeDashoffset = circumference;
-  
+
   // Animate the score circle
   setTimeout(() => {
     const offset = circumference - (percentage / 100) * circumference;
     scoreCircle.style.transition = "stroke-dashoffset 1.5s ease-in-out";
     scoreCircle.style.strokeDashoffset = offset;
-    
+
     // Change color based on score
     if (percentage < 40) {
       scoreCircle.style.stroke = "#ef4444"; // Red for low scores
@@ -1219,19 +1316,20 @@ async function finishQuiz() {
   questions.forEach((question, index) => {
     const userAnswer = userAnswers[index] || "Not selected";
     let isCorrect = false;
-    let resultHtml = '';
-    
+    let resultHtml = "";
+
     // Generate different result content based on question type
     if (question.type === "multiple-choice") {
       isCorrect = userAnswer === question.correctAnswer;
-      
+
       resultHtml = `
         <p class="text-gray-700">
           <strong>Your answer:</strong>
           <span class="font-semibold px-2 py-1 rounded
-            ${isCorrect 
-              ? "text-green-700 bg-green-100 border border-green-400"
-              : "text-red-700 bg-red-100 border border-red-400"
+            ${
+              isCorrect
+                ? "text-green-700 bg-green-100 border border-green-400"
+                : "text-red-700 bg-red-100 border border-red-400"
             }">
             ${userAnswer}
           </span>
@@ -1249,11 +1347,10 @@ async function finishQuiz() {
           </span>
         </p>
       `;
-      
     } else if (question.type === "drag-and-drop") {
       // For drag and drop, check if the sequence matches
-      const correctSequence = question.correctSequence.map(num => num - 1); // Convert to 0-based
-      
+      const correctSequence = question.correctSequence.map((num) => num - 1); // Convert to 0-based
+
       isCorrect = true;
       if (userAnswer && userAnswer.length === correctSequence.length) {
         for (let i = 0; i < userAnswer.length; i++) {
@@ -1265,23 +1362,35 @@ async function finishQuiz() {
       } else {
         isCorrect = false;
       }
-      
+
       resultHtml = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
           <div>
             <p class="font-semibold text-gray-700 mb-2">Your sequence:</p>
             <ol class="list-decimal pl-5 space-y-1">
-              ${userAnswer && userAnswer.length ? userAnswer.map(idx => 
-                `<li class="p-1 bg-white rounded border ${isCorrect ? 'border-green-300' : 'border-red-300'}">${question.items[idx]}</li>`
-              ).join('') : '<li class="text-red-500">Not answered</li>'}
+              ${
+                userAnswer && userAnswer.length
+                  ? userAnswer
+                      .map(
+                        (idx) =>
+                          `<li class="p-1 bg-white rounded border ${
+                            isCorrect ? "border-green-300" : "border-red-300"
+                          }">${question.items[idx]}</li>`
+                      )
+                      .join("")
+                  : '<li class="text-red-500">Not answered</li>'
+              }
             </ol>
           </div>
           <div>
             <p class="font-semibold text-gray-700 mb-2">Correct sequence:</p>
             <ol class="list-decimal pl-5 space-y-1">
-              ${correctSequence.map(idx => 
-                `<li class="p-1 bg-white rounded border border-green-300">${question.items[idx]}</li>`
-              ).join('')}
+              ${correctSequence
+                .map(
+                  (idx) =>
+                    `<li class="p-1 bg-white rounded border border-green-300">${question.items[idx]}</li>`
+                )
+                .join("")}
             </ol>
           </div>
         </div>
@@ -1292,19 +1401,18 @@ async function finishQuiz() {
           </span>
         </p>
       `;
-      
     } else if (question.type === "match-answer") {
       // For match answer, check if all matches are correct
       const correctMatches = question.matches;
-      
+
       isCorrect = true;
       if (userAnswer && userAnswer.length === correctMatches.length) {
         // Create a map of correct matches for easy lookup
         const correctMap = {};
-        correctMatches.forEach(match => {
+        correctMatches.forEach((match) => {
           correctMap[match.left] = match.right;
         });
-        
+
         // Check each user match against correct matches
         for (const match of userAnswer) {
           if (correctMap[match.left] !== match.right) {
@@ -1315,56 +1423,75 @@ async function finishQuiz() {
       } else {
         isCorrect = false;
       }
-      
+
       resultHtml = `
         <div class="mt-2">
           <p class="font-semibold text-gray-700 mb-2">Your matches:</p>
           <ul class="space-y-1">
-            ${userAnswer && userAnswer.length ? userAnswer.map(match => {
-              const isMatchCorrect = correctMatches.some(m => 
-                m.left === match.left && m.right === match.right
-              );
-              
-              const leftItem = question.columnA.find(item => item.startsWith(match.left + "."));
-              const rightItem = question.columnB.find(item => item.startsWith(match.right + "."));
-              
-              return `
-                <li class="p-1 bg-white rounded border ${isMatchCorrect ? 'border-green-300' : 'border-red-300'} flex items-center">
+            ${
+              userAnswer && userAnswer.length
+                ? userAnswer
+                    .map((match) => {
+                      const isMatchCorrect = correctMatches.some(
+                        (m) => m.left === match.left && m.right === match.right
+                      );
+
+                      const leftItem = question.columnA.find((item) =>
+                        item.startsWith(match.left + ".")
+                      );
+                      const rightItem = question.columnB.find((item) =>
+                        item.startsWith(match.right + ".")
+                      );
+
+                      return `
+                <li class="p-1 bg-white rounded border ${
+                  isMatchCorrect ? "border-green-300" : "border-red-300"
+                } flex items-center">
                   <span class="font-semibold mr-1">${match.left}</span> ↔ 
                   <span class="font-semibold mx-1">${match.right}</span>: 
-                  <span class="ml-1">${leftItem?.substring(3) || ''}</span> ↔ 
-                  <span class="ml-1">${rightItem?.substring(3) || ''}</span>
-                  ${isMatchCorrect ? 
-                    '<span class="text-green-600 ml-2">✓</span>' : 
-                    '<span class="text-red-600 ml-2">✗</span>'
+                  <span class="ml-1">${leftItem?.substring(3) || ""}</span> ↔ 
+                  <span class="ml-1">${rightItem?.substring(3) || ""}</span>
+                  ${
+                    isMatchCorrect
+                      ? '<span class="text-green-600 ml-2">✓</span>'
+                      : '<span class="text-red-600 ml-2">✗</span>'
                   }
                 </li>
               `;
-            }).join('') : '<li class="text-red-500">Not answered</li>'}
+                    })
+                    .join("")
+                : '<li class="text-red-500">Not answered</li>'
+            }
           </ul>
           
           <p class="font-semibold text-gray-700 mt-3 mb-2">Correct matches:</p>
           <ul class="space-y-1">
-            ${correctMatches.map(match => {
-              const leftItem = question.columnA.find(item => item.startsWith(match.left + "."));
-              const rightItem = question.columnB.find(item => item.startsWith(match.right + "."));
-              
-              return `
+            ${correctMatches
+              .map((match) => {
+                const leftItem = question.columnA.find((item) =>
+                  item.startsWith(match.left + ".")
+                );
+                const rightItem = question.columnB.find((item) =>
+                  item.startsWith(match.right + ".")
+                );
+
+                return `
                 <li class="p-1 bg-white rounded border border-green-300 flex items-center">
                   <span class="font-semibold mr-1">${match.left}</span> ↔ 
                   <span class="font-semibold mx-1">${match.right}</span>: 
-                  <span class="ml-1">${leftItem?.substring(3) || ''}</span> ↔ 
-                  <span class="ml-1">${rightItem?.substring(3) || ''}</span>
+                  <span class="ml-1">${leftItem?.substring(3) || ""}</span> ↔ 
+                  <span class="ml-1">${rightItem?.substring(3) || ""}</span>
                 </li>
               `;
-            }).join('')}
+              })
+              .join("")}
           </ul>
         </div>
         
         <div class="mt-3">
           <p class="font-semibold text-gray-700 mb-1">Explanations:</p>
           <ul class="text-gray-800 italic space-y-1">
-            ${question.explanations.map(exp => `<li>${exp}</li>`).join('')}
+            ${question.explanations.map((exp) => `<li>${exp}</li>`).join("")}
           </ul>
         </div>
       `;
@@ -1373,7 +1500,11 @@ async function finishQuiz() {
     const questionHtml = `
       <div class="result-question bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1">
         <!-- Question header with status badge -->
-        <div class="flex justify-between items-center p-4 border-b ${isCorrect ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}">
+        <div class="flex justify-between items-center p-4 border-b ${
+          isCorrect
+            ? "bg-green-50 border-green-100"
+            : "bg-red-50 border-red-100"
+        }">
           <h4 class="text-lg font-semibold text-gray-900 flex items-center">
             <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 mr-3 font-bold">
               ${index + 1}
@@ -1381,11 +1512,14 @@ async function finishQuiz() {
             ${question.question}
           </h4>
           <span class="px-3 py-1 rounded-full text-sm font-medium ${
-            isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            isCorrect
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
           } flex items-center">
-            ${isCorrect 
-              ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Correct' 
-              : '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>Incorrect'
+            ${
+              isCorrect
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Correct'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>Incorrect'
             }
           </span>
         </div>
@@ -1462,13 +1596,17 @@ window.addEventListener("beforeunload", (event) => {
 // Go back to home page
 function goHome() {
   console.log("goHome called");
-  
+
   // Kiểm tra xem người dùng đang ở trong quá trình làm quiz hay không
-  if (!document.getElementById("quiz-section").classList.contains("hidden") && 
-      window.quizModule.getUserAnswers().some(answer => answer !== null)) {
+  if (
+    !document.getElementById("quiz-section").classList.contains("hidden") &&
+    window.quizModule.getUserAnswers().some((answer) => answer !== null)
+  ) {
     // Hiển thị thông báo xác nhận
-    const confirmLeave = confirm("Bạn có chắc chắn muốn quay lại trang chủ? Tiến trình làm bài sẽ được lưu lại, nhưng bạn sẽ phải bắt đầu lại từ đầu khi quay lại.");
-    
+    const confirmLeave = confirm(
+      "Bạn có chắc chắn muốn quay lại trang chủ? Tiến trình làm bài sẽ được lưu lại, nhưng bạn sẽ phải bắt đầu lại từ đầu khi quay lại."
+    );
+
     if (confirmLeave) {
       // Lưu tiến trình trước khi rời đi
       if (currentQuizId) {
@@ -1480,7 +1618,7 @@ function goHome() {
             currentScore: window.quizModule.getCurrentScore(),
             lastSaved: Date.now(),
           };
-          
+
           // Lưu vào IndexedDB
           window.quizDB.saveQuiz(quizData);
           console.log("Quiz progress saved before leaving");
@@ -1488,7 +1626,7 @@ function goHome() {
           console.error("Failed to save quiz progress:", error);
         }
       }
-      
+
       // Chuyển hướng về trang chủ
       window.location.href = "./Home.html";
     }
