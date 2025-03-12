@@ -18,6 +18,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadQuizHistory(filters = {}) {
   try {
     const quizzes = await window.quizDB.getQuizzes(filters);
+    
+    // Get current sort order
+    const sortSelect = document.getElementById("sort");
+    const sortOrder = sortSelect ? sortSelect.value : "date-desc";
+
+    // Apply sorting to all quizzes
+    switch (sortOrder) {
+      case "date-desc":
+        quizzes.sort((a, b) => b.timestamp - a.timestamp);
+        break;
+      case "date-asc":
+        quizzes.sort((a, b) => a.timestamp - b.timestamp);
+        break;
+      case "score-desc":
+        quizzes.sort((a, b) => {
+          const scoreA = a.status === "completed" ? (a.scorePercentage || (a.finalScore / a.questionCount) * 100) : -1;
+          const scoreB = b.status === "completed" ? (b.scorePercentage || (b.finalScore / b.questionCount) * 100) : -1;
+          return scoreB - scoreA;
+        });
+        break;
+      case "score-asc":
+        quizzes.sort((a, b) => {
+          const scoreA = a.status === "completed" ? (a.scorePercentage || (a.finalScore / a.questionCount) * 100) : 999;
+          const scoreB = b.status === "completed" ? (b.scorePercentage || (b.finalScore / b.questionCount) * 100) : 999;
+          return scoreA - scoreB;
+        });
+        break;
+    }
 
     // Update stats
     updateStats(quizzes);
@@ -55,17 +83,17 @@ function renderQuizList(containerId, quizzes) {
 
   if (quizzes.length === 0) {
     container.innerHTML =
-      '<p class="text-gray-500 text-center py-4">No quizzes found</p>';
+      '<p class="text-gray-400 font-arcade text-center py-4">No quizzes found</p>';
     return;
   }
 
   // Create list
   const list = document.createElement("ul");
-  list.className = "divide-y divide-gray-200";
+  list.className = "";
 
   quizzes.forEach((quiz) => {
     const li = document.createElement("li");
-    li.className = "hover:bg-gray-50";
+    li.className = "p-3";
 
     // Calculate time spent
     const timeSpent = quiz.endTime
@@ -74,10 +102,10 @@ function renderQuizList(containerId, quizzes) {
 
     // Format date
     const date = new Date(quiz.timestamp);
-    const formattedDate = date.toLocaleDateString("vi-VN", {
+    const formattedDate = date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
-      day: "numeric",
+      day: "numeric"
     });
 
     // Calculate score badge class
@@ -94,66 +122,71 @@ function renderQuizList(containerId, quizzes) {
 
     // Create quiz item HTML
     li.innerHTML = `
-      <div class="px-4 py-4 sm:px-6">
-        <div class="flex items-center justify-between">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <p class="text-sm font-medium text-primary-600 truncate">
-              ${quiz.topic}
-            </p>
-            <div class="flex items-center">
-              ${
-                quiz.status === "completed"
-                  ? `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${scoreBadgeClass}">
-                  ${Math.round(
-                    quiz.scorePercentage ||
-                      (quiz.finalScore / quiz.questionCount) * 100
-                  )}%
-                </span>
-                <span class="ml-2 text-xs text-gray-500">
-                  ${quiz.finalScore || quiz.currentScore}/${
-                      quiz.questionCount
-                    } correct
-                </span>`
-                  : `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                  In Progress
-                </span>
-                <span class="ml-2 text-xs text-gray-500">
-                  ${quiz.currentScore || 0}/${quiz.questionCount} correct
-                </span>`
-              }
-            </div>
-          </div>
-          <div class="flex flex-col items-end text-sm text-gray-500">
-            <time datetime="${date.toISOString()}">${formattedDate}</time>
-            <span>${timeSpent}</span>
-          </div>
-        </div>
-        <div class="mt-2 sm:flex sm:justify-between">
-          <div class="sm:flex">
-            <p class="flex items-center text-sm text-gray-500">
-              <span class="inline-block h-2 w-2 flex-shrink-0 rounded-full bg-primary-500 mr-2"></span>
-              ${quiz.questionCount} questions
-            </p>
-          </div>
-          <div class="mt-2 sm:mt-0">
-            ${
-              quiz.status === "incomplete"
-                ? `<div class="flex space-x-2">
-                <button class="resume-quiz text-xs bg-primary-600 hover:bg-primary-700 text-white px-2 py-1 rounded"
-                  data-id="${quiz.id}">Resume</button>
-                <button class="delete-quiz text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
-                  data-id="${quiz.id}">Delete</button>
-              </div>`
-                : `<div class="flex space-x-2">
-                <button class="retake-quiz text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded"
-                  data-id="${quiz.id}">Retake</button>
-                <button class="delete-quiz text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
-                  data-id="${quiz.id}">Delete</button>
-              </div>`
-            }
-          </div>
-        </div>
+      <li class="bg-white/50 rounded-lg overflow-hidden p-4">
+  <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+      <p class="text-sm font-semibold text-primary-600 truncate text-dark font-arcade">
+        ${quiz.topic}
+      </p>
+      <div class="flex items-center">
+        ${
+          quiz.status === "completed"
+            ? `<span class="px-3 py-1 text-xs font-bold rounded-full text-dark font-arcade ${scoreBadgeClass}">
+                ${Math.round(
+                  quiz.scorePercentage ||
+                    (quiz.finalScore / quiz.questionCount) * 100
+                )}%
+              </span>
+              <span class="ml-2 text-xs text-gray-500 ">
+                ${quiz.finalScore || quiz.currentScore}/${
+                quiz.questionCount
+              } correct
+              </span>`
+            : `<span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 text-dark font-arcade">
+                In Progress
+              </span>
+              <span class="ml-2 text-xs text-gray-500">
+                ${quiz.currentScore || 0}/${quiz.questionCount} correct
+              </span>`
+        }
       </div>
+    </div>
+    <div class="text-sm text-gray-500 text-right text-dark font-arcade">
+      <time datetime="${date.toISOString()}" class="block font-medium">${formattedDate}</time>
+      <span class="text-xs">${timeSpent}</span>
+    </div>
+  </div>
+
+  <div class="mt-3 flex flex-col sm:flex-row sm:justify-between">
+    <p class="flex items-center text-sm text-dark font-arcade">
+      <span class="h-2 w-2 rounded-full bg-primary-500 mr-2 text-dark font-arcade"></span>
+      ${quiz.questionCount} questions
+    </p>
+
+    <div class="mt-2 sm:mt-0 flex space-x-3">
+      ${
+        quiz.status === "incomplete"
+          ? `<button class="retake-quiz text-xs px-3 py-1 rounded-lg bg-green-300 hover:bg-green-700  font-medium shadow-sm transition text-dark font-arcade"
+              data-id="${quiz.id}" aria-label="Resume Quiz">
+              Resume
+            </button>
+            <button class="delete-quiz text-xs px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 font-medium shadow-sm transition text-dark font-arcade"
+              data-id="${quiz.id}" aria-label="Delete Quiz">
+              Delete
+            </button>`
+          : `<button class="retake-quiz text-xs px-3 py-1 rounded-lg bg-green-600 hover:bg-green-700  font-medium shadow-sm transition text-dark font-arcade"
+              data-id="${quiz.id}" aria-label="Retake Quiz">
+              Retake
+            </button>
+            <button class="delete-quiz text-xs px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700  font-medium shadow-sm transition text-dark font-arcade"
+              data-id="${quiz.id}" aria-label="Delete Quiz">
+              Delete
+            </button>`
+      }
+    </div>
+  </div>
+</li>
+
     `;
 
     list.appendChild(li);
@@ -221,11 +254,17 @@ function updateStats(quizzes) {
 
 // Add event listeners to quiz action buttons
 function addQuizActionListeners() {
+  // Remove existing event listeners by cloning and replacing elements
+  document.querySelectorAll(".resume-quiz, .retake-quiz, .delete-quiz").forEach(button => {
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+  });
+
   // Resume quiz buttons
   document.querySelectorAll(".resume-quiz").forEach((button) => {
     button.addEventListener("click", async (event) => {
       const quizId = Number.parseInt(event.target.dataset.id);
-      window.location.href = `index.html?id=${quizId}`;
+      window.location.href = `../home/Home.html?id=${quizId}`;
     });
   });
 
@@ -235,22 +274,26 @@ function addQuizActionListeners() {
       const quizId = Number.parseInt(event.target.dataset.id);
       try {
         const quiz = await window.quizDB.getQuiz(quizId);
+        if (quiz.status === "incomplete") {
+          // If quiz is incomplete, just resume it
+          window.location.href = `../home/Home.html?id=${quizId}`;
+        } else {
+          // If quiz is completed, create a new one
+          const newQuiz = {
+            topic: quiz.topic,
+            questionCount: quiz.questionCount,
+            questions: quiz.questions,
+            userAnswers: Array(quiz.questions.length).fill(null),
+            currentQuestionIndex: 0,
+            currentScore: 0,
+            status: "incomplete",
+            timestamp: Date.now(),
+            startTime: Date.now(),
+          };
 
-        // Create a new quiz with the same topic and question count
-        const newQuiz = {
-          topic: quiz.topic,
-          questionCount: quiz.questionCount,
-          questions: quiz.questions,
-          userAnswers: Array(quiz.questions.length).fill(null),
-          currentQuestionIndex: 0,
-          currentScore: 0,
-          status: "incomplete",
-          timestamp: Date.now(),
-          startTime: Date.now(),
-        };
-
-        const newQuizId = await window.quizDB.saveQuiz(newQuiz);
-        window.location.href = `index.html?id=${newQuizId}`;
+          const newQuizId = await window.quizDB.saveQuiz(newQuiz);
+          window.location.href = `../home/Home.html?id=${newQuizId}`;
+        }
       } catch (error) {
         console.error("Failed to retake quiz:", error);
         showErrorMessage("Failed to retake quiz. Please try again.");
@@ -265,7 +308,6 @@ function addQuizActionListeners() {
       if (confirm("Are you sure you want to delete this quiz?")) {
         try {
           await window.quizDB.deleteQuiz(quizId);
-          // Reload quiz history
           await loadQuizHistory();
         } catch (error) {
           console.error("Failed to delete quiz:", error);
@@ -278,20 +320,14 @@ function addQuizActionListeners() {
 
 // Set up event listeners for filters
 function setupFilterListeners() {
-  const categorySelect = document.getElementById("category");
   const dateRangeSelect = document.getElementById("date-range");
   const sortSelect = document.getElementById("sort");
 
   const applyFilters = async () => {
     const filters = {};
 
-    // Apply category filter
-    if (categorySelect.value !== "all") {
-      filters.topic = categorySelect.value;
-    }
-
     // Apply date range filter
-    if (dateRangeSelect.value !== "all") {
+    if (dateRangeSelect && dateRangeSelect.value !== "all") {
       const now = Date.now();
       let startTime;
 
@@ -310,65 +346,13 @@ function setupFilterListeners() {
       filters.startTime = startTime;
     }
 
-    // Load quizzes with filters
-    const quizzes = await window.quizDB.getQuizzes(filters);
-
-    // Apply sorting
-    switch (sortSelect.value) {
-      case "date-desc":
-        quizzes.sort((a, b) => b.timestamp - a.timestamp);
-        break;
-      case "date-asc":
-        quizzes.sort((a, b) => a.timestamp - b.timestamp);
-        break;
-      case "score-desc":
-        quizzes.sort((a, b) => {
-          const scoreA =
-            a.status === "completed"
-              ? a.scorePercentage || (a.finalScore / a.questionCount) * 100
-              : 0;
-          const scoreB =
-            b.status === "completed"
-              ? b.scorePercentage || (b.finalScore / b.questionCount) * 100
-              : 0;
-          return scoreB - scoreA;
-        });
-        break;
-      case "score-asc":
-        quizzes.sort((a, b) => {
-          const scoreA =
-            a.status === "completed"
-              ? a.scorePercentage || (a.finalScore / a.questionCount) * 100
-              : 0;
-          const scoreB =
-            b.status === "completed"
-              ? b.scorePercentage || (b.finalScore / b.questionCount) * 100
-              : 0;
-          return scoreA - scoreB;
-        });
-        break;
-    }
-
-    // Update stats
-    updateStats(quizzes);
-
-    // Separate quizzes by status
-    const incompleteQuizzes = quizzes.filter(
-      (quiz) => quiz.status === "incomplete"
-    );
-    const completedQuizzes = quizzes.filter(
-      (quiz) => quiz.status === "completed"
-    );
-
-    // Render both lists
-    renderQuizList("incomplete-list", incompleteQuizzes);
-    renderQuizList("completed-list", completedQuizzes);
+    // Load quizzes with filters and current sort order
+    await loadQuizHistory(filters);
   };
 
   // Add event listeners
-  categorySelect.addEventListener("change", applyFilters);
-  dateRangeSelect.addEventListener("change", applyFilters);
-  sortSelect.addEventListener("change", applyFilters);
+  if (dateRangeSelect) dateRangeSelect.addEventListener("change", applyFilters);
+  if (sortSelect) sortSelect.addEventListener("change", applyFilters);
 }
 
 // Show error message
@@ -387,5 +371,5 @@ function showErrorMessage(message) {
 
 // Add event listener for new quiz button
 document.getElementById("new-quiz-btn")?.addEventListener("click", () => {
-  window.location.href = "index.html";
+  window.location.href = "../../index.html";
 });

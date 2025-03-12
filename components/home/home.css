@@ -1,0 +1,217 @@
+/* Custom colors */
+.bg-brown-700 {
+  background-color: #5d4037;
+}
+
+.bg-brown-800 {
+  background-color: #4e342e;
+}
+
+.border-brown-700 {
+  border-color: #5d4037;
+}
+
+/* Custom animations */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-delay {
+  animation: float 4s ease-in-out 2s infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+/* Cloud styling */
+.cloud {
+  position: relative;
+  border-radius: 20px;
+}
+
+.cloud:before,
+.cloud:after {
+  content: '';
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+}
+
+.cloud:before {
+  width: 25px;
+  height: 25px;
+  top: -10px;
+  left: 10px;
+}
+
+.cloud:after {
+  width: 30px;
+  height: 30px;
+  top: -15px;
+  right: 10px;
+}
+
+/* Coin styling */
+.coin {
+  position: relative;
+}
+
+.coin:before {
+  content: '$';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #b45309;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* Fireworks */
+.firework {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Section transitions */
+.section {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.section.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  display: none;
+}
+
+/* Question container transitions */
+.correct-bg {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  border: 2px solid #10b981 !important;
+}
+
+.incorrect-bg {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  border: 2px solid #ef4444 !important;
+}
+
+/* Answer option styling */
+.answer-option {
+  transition: all 0.2s ease;
+}
+
+.answer-option:hover:not(.disabled) {
+  transform: translateX(5px);
+}
+
+.answer-option.selected {
+  background-color: rgba(59, 130, 246, 0.5);
+  border-color: #93c5fd;
+}
+
+.answer-option.correct {
+  background-color: rgba(16, 185, 129, 0.5);
+  border-color: #10b981;
+}
+
+.answer-option.incorrect {
+  background-color: rgba(239, 68, 68, 0.5);
+  border-color: #ef4444;
+}
+
+.answer-option.disabled {
+  cursor: default;
+}
+
+/* Font classes */
+.font-arcade {
+  font-family: 'Press Start 2P', monospace;
+}
+
+/* Question Card Styling */
+.preview-question {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.preview-question:hover {
+  transform: translateY(-2px);
+}
+
+/* Choice Styling */
+.preview-question ul li {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: background 0.2s ease-in-out;
+}
+
+.preview-question ul li:hover {
+  background: #f3f4f6;
+}
+
+/* Button Effects */
+button {
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* Smooth Scrolling */
+.preview-question::-webkit-scrollbar {
+  width: 6px;
+}
+
+.preview-question::-webkit-scrollbar-thumb {
+  background: #aaa;
+  border-radius: 6px;
+}
+
+.preview-question::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+html,
+body {
+  height: 100%;
+  overflow-y: auto;
+  /* Cho phép cuộn tự do */
+}
+
+/* Bỏ giới hạn chiều cao của preview-section */
+#preview-section {
+  max-height: none;
+  /* Bỏ giới hạn chiều cao */
+  overflow: visible;
+  /* Cho phép nội dung hiển thị đầy đủ */
+}
+
+/* Nếu vẫn muốn cuộn mượt khi có quá nhiều câu hỏi */
+.preview-question {
+  margin-bottom: 16px;
+  /* Thêm khoảng cách giữa các câu hỏi */
+}
