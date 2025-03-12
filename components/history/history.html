@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz History</title>
+  <link rel="icon" type="image/x-icon" href="../../assets/favicon.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+              950: '#082f49',
+            },
+          }
+        }
+      }
+    }
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arcade: ['"Press Start 2P"', "monospace"],
+            // sans: ["Roboto", "system-ui", "sans-serif"],
+          },
+          colors: {
+            arcade: {
+              blue: "#38bdf8",
+              green: "#4ade80",
+              red: "#f87171",
+              yellow: "#facc15",
+              pink: "#f472b6",
+              purple: "#a78bfa",
+            },
+          },
+          animation: {
+            float: "float 4s ease-in-out infinite",
+            "float-delay": "float 4s ease-in-out 2s infinite",
+            "pulse-slow": "pulse 3s ease-in-out infinite",
+          },
+          keyframes: {
+            float: {
+              "0%, 100%": { transform: "translateY(0)" },
+              "50%": { transform: "translateY(-10px)" },
+            },
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<!-- Sky background -->
+<div class="fixed top-0 left-0 w-full h-full bg-sky-300 z-0"></div>
+<!-- Floating clouds -->
+<div class="fixed top-20 left-10 animate-float z-10">
+  <div class="cloud w-16 h-10 bg-white rounded-full opacity-90"></div>
+</div>
+<div class="fixed top-40 right-20 animate-float-delay z-10">
+  <div class="cloud w-16 h-10 bg-white rounded-full opacity-90"></div>
+</div>
+<div class="fixed bottom-40 left-1/4 animate-float z-10">
+  <div class="cloud w-16 h-10 bg-white rounded-full opacity-90"></div>
+</div>
+
+<!-- Floating platforms -->
+<div class="fixed top-1/4 left-10 z-10">
+  <div class="platform w-24 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative">
+    <div class="fixed top-0 left-0 w-full h-1 bg-green-400"></div>
+    <div class="fixed -top-4 left-0 w-full h-4 bg-brown-800 border-t-4 border-brown-700"></div>
+  </div>
+</div>
+<div class="fixed top-1/3 right-20 z-10">
+  <div class="platform w-24 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative">
+    <div class="fixed top-0 left-0 w-full h-1 bg-green-400"></div>
+    <div class="fixed -top-4 left-0 w-full h-4 bg-brown-800 border-t-4 border-brown-700"></div>
+  </div>
+</div>
+<div class="fixed bottom-1/4 left-1/3 z-10">
+  <div class="platform w-24 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative">
+    <div class="fixed top-0 left-0 w-full h-1 bg-green-400"></div>
+    <div class="fixed -top-4 left-0 w-full h-4 bg-brown-800 border-t-4 border-brown-700"></div>
+  </div>
+</div>
+
+<!-- Coins -->
+<div class="fixed top-1/3 right-1/4 animate-pulse z-10">
+  <div class="coin w-6 h-6 bg-yellow-400 rounded-full border-2 border-yellow-500 shadow-inner"></div>
+</div>
+<div class="fixed bottom-1/3 left-1/5 animate-pulse-slow z-10">
+  <div class="coin w-6 h-6 bg-yellow-400 rounded-full border-2 border-yellow-500 shadow-inner"></div>
+</div>
+
+<body class="bg-white/50 min-h-screen">
+  <div class="container mx-auto px-4 py-8 relative z-20">
+    <header class="bg-white/50 shadow rounded-lg mb-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 font-arcade">Quiz History</h1>
+            <p class="mt-2 text-sm text-gray-600 font-arcade">Progress and Result Tracker</p>
+          </div>
+          <div class=" btn-primary border-4 border-black rounded-md">
+            <a href="../home/Home.html"
+              class="bg-primary-600 hover:bg-primary-700 text-dark px-5 py-2.5 rounded-md transition-colors duration-200 font-medium text-sm inline-flex items-center font-arcade">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clip-rule="evenodd" />
+              </svg>
+              Generate New Quiz
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-full mx-auto">
+      <!-- Stats overview -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div
+          class="bg-white/50 rounded-lg shadow p-6 border border-gray-100 hover:shadow-md transition-shadow duration-200">
+          <p class="text-sm font-medium text-dark font-arcade">Total Quizzes</p>
+          <p id="total-quizzes" class="text-3xl font-bold text-dark font-arcade mt-2">0</p>
+        </div>
+        <div
+          class="bg-white/50 rounded-lg shadow p-6 border border-gray-100 hover:shadow-md transition-shadow duration-200">
+          <p class="text-sm font-medium text-gray-500">Average Score</p>
+          <p id="average-score" class="text-3xl font-bold text-dark font-arcade mt-2">0%</p>
+        </div>
+        <div
+          class="bg-white/50 rounded-lg shadow p-6 border border-gray-100 hover:shadow-md transition-shadow duration-200">
+          <p class="text-sm font-medium text-dark font-arcade">Highest Score</p>
+          <p id="best-score" class="text-3xl font-bold text-dark font-arcade mt-2">0%</p>
+        </div>
+      </div>
+
+      <!-- Filter controls -->
+      <div class="bg-white/50 rounded-lg shadow p-6 mb-8 border border-gray-100">
+        <div class="flex flex-col sm:flex-row gap-6">
+          <div class="flex-1">
+            <label for="date-range" class="block text-sm font-medium text-dark font-arcade mb-2">Time Period</label>
+            <select id="date-range"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3 border bg-white">
+              <option class="text-dark font-arcade" value="all">All Time</option>
+              <option class="text-dark font-arcade" value="week">Last Week</option>
+              <option class="text-dark font-arcade" value="month">Last Month</option>
+              <option class="text-dark font-arcade" value="year">Last Year</option>
+            </select>
+          </div>
+          <div class="flex-1">
+            <label for="sort" class="block text-sm font-medium text-dark font-arcade mb-2">Sorting Order</label>
+            <select id="sort"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3 border bg-white">
+              <option class="text-dark font-arcade" value="date-desc">Date (Newest)</option>
+              <option class="text-dark font-arcade" value="date-asc">Date (Oldest)</option>
+              <option class="text-dark font-arcade" value="score-desc">Score (Highest)</option>
+              <option class="text-dark font-arcade" value="score-asc">Score (Lowest)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incomplete quizzes section -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-dark font-arcade mb-4">
+          Incomplete Quizzes List
+        </h2>
+        <div id="incomplete-list" class="bg-white/50 rounded-lg shadow overflow-hidden border border-gray-100">
+          <div class="flex items-center justify-center py-8">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            <p class="text-dark font-arcade">Loading quiz data...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed quizzes section -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-dark font-arcade mb-4">
+          Completed Quizzes List
+        </h2>
+        <div id="completed-list" class="bg-white/50 rounded-lg shadow overflow-hidden border border-gray-100 ">
+          <div class="flex items-center justify-center py-8">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            <p class="text-gray-500">Loading quiz data...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="mt-10 text-dark font-arcade text-sm">© 2025 AI Quiz Generator - Team 1 - Devplus</footer>
+  </div>
+
+  <script src="../history/db.js"></script>
+  <script src="../history/history.js"></script>
+</body>
+
+</html>
