@@ -1,599 +1,537 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Arcade Game Quiz</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              arcade: ['"Press Start 2P"', "monospace"],
-              // sans: ["Roboto", "system-ui", "sans-serif"],
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcade Game Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap"
+    rel="stylesheet" />
+  <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arcade: ['"Press Start 2P"', "monospace"],
+            // sans: ["Roboto", "system-ui", "sans-serif"],
+          },
+          colors: {
+            arcade: {
+              blue: "#38bdf8",
+              green: "#4ade80",
+              red: "#f87171",
+              yellow: "#facc15",
+              pink: "#f472b6",
+              purple: "#a78bfa",
             },
-            colors: {
-              arcade: {
-                blue: "#38bdf8",
-                green: "#4ade80",
-                red: "#f87171",
-                yellow: "#facc15",
-                pink: "#f472b6",
-                purple: "#a78bfa",
-              },
+          },
+          animation: {
+            float: "float 4s ease-in-out infinite",
+            "float-delay": "float 4s ease-in-out 2s infinite",
+            "pulse-slow": "pulse 3s ease-in-out infinite",
+            "bounce-slow": "bounce 3s ease-in-out infinite",
+            "spin-slow": "spin 8s linear infinite",
+            wiggle: "wiggle 1s ease-in-out infinite",
+            "pixel-move": "pixel-move 10s infinite linear",
+            jump: "jump 1s infinite",
+            blink: "blink 1s infinite",
+            glitch: "glitch 3s infinite",
+            marquee: "marquee 20s linear infinite",
+          },
+          keyframes: {
+            float: {
+              "0%, 100%": { transform: "translateY(0)" },
+              "50%": { transform: "translateY(-10px)" },
             },
-            animation: {
-              float: "float 4s ease-in-out infinite",
-              "float-delay": "float 4s ease-in-out 2s infinite",
-              "pulse-slow": "pulse 3s ease-in-out infinite",
-              "bounce-slow": "bounce 3s ease-in-out infinite",
-              "spin-slow": "spin 8s linear infinite",
-              wiggle: "wiggle 1s ease-in-out infinite",
-              "pixel-move": "pixel-move 10s infinite linear",
-              jump: "jump 1s infinite",
-              blink: "blink 1s infinite",
-              glitch: "glitch 3s infinite",
-              marquee: "marquee 20s linear infinite",
+            wiggle: {
+              "0%, 100%": { transform: "rotate(-3deg)" },
+              "50%": { transform: "rotate(3deg)" },
             },
-            keyframes: {
-              float: {
-                "0%, 100%": { transform: "translateY(0)" },
-                "50%": { transform: "translateY(-10px)" },
-              },
-              wiggle: {
-                "0%, 100%": { transform: "rotate(-3deg)" },
-                "50%": { transform: "rotate(3deg)" },
-              },
-              "pixel-move": {
-                "0%": { transform: "translateX(-100%)" },
-                "100%": { transform: "translateX(100vw)" },
-              },
-              jump: {
-                "0%, 100%": { transform: "translateY(0)" },
-                "50%": { transform: "translateY(-20px)" },
-              },
-              blink: {
-                "0%, 100%": { opacity: 1 },
-                "50%": { opacity: 0 },
-              },
-              glitch: {
-                "0%, 100%": { transform: "translate(0)" },
-                "20%": { transform: "translate(-2px, 2px)" },
-                "40%": { transform: "translate(-2px, -2px)" },
-                "60%": { transform: "translate(2px, 2px)" },
-                "80%": { transform: "translate(2px, -2px)" },
-              },
-              marquee: {
-                "0%": { transform: "translateX(100%)" },
-                "100%": { transform: "translateX(-100%)" },
-              },
+            "pixel-move": {
+              "0%": { transform: "translateX(-100%)" },
+              "100%": { transform: "translateX(100vw)" },
+            },
+            jump: {
+              "0%, 100%": { transform: "translateY(0)" },
+              "50%": { transform: "translateY(-20px)" },
+            },
+            blink: {
+              "0%, 100%": { opacity: 1 },
+              "50%": { opacity: 0 },
+            },
+            glitch: {
+              "0%, 100%": { transform: "translate(0)" },
+              "20%": { transform: "translate(-2px, 2px)" },
+              "40%": { transform: "translate(-2px, -2px)" },
+              "60%": { transform: "translate(2px, 2px)" },
+              "80%": { transform: "translate(2px, -2px)" },
+            },
+            marquee: {
+              "0%": { transform: "translateX(100%)" },
+              "100%": { transform: "translateX(-100%)" },
             },
           },
         },
-      };
-    </script>
-    <style>
-      /* Pixel Art Styles */
-      .pixel-art {
-        image-rendering: pixelated;
-        image-rendering: -moz-crisp-edges;
-        image-rendering: crisp-edges;
+      },
+    };
+  </script>
+  <style>
+    /* Pixel Art Styles */
+    .pixel-art {
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+
+    .pixel-border {
+      position: relative;
+      border: 4px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .pixel-border::after {
+      content: "";
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      bottom: -4px;
+      left: -4px;
+      background: linear-gradient(45deg, #38bdf8, #4ade80, #f87171, #facc15);
+      z-index: -1;
+      animation: border-animation 4s linear infinite;
+    }
+
+    @keyframes border-animation {
+      0% {
+        background-position: 0% 50%;
       }
 
-      .pixel-border {
-        position: relative;
-        border: 4px solid transparent;
-        background-clip: padding-box;
+      50% {
+        background-position: 100% 50%;
       }
 
-      .pixel-border::after {
-        content: "";
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        bottom: -4px;
-        left: -4px;
-        background: linear-gradient(45deg, #38bdf8, #4ade80, #f87171, #facc15);
-        z-index: -1;
-        animation: border-animation 4s linear infinite;
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .star {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      animation: twinkle 2s infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: 0.2;
       }
 
-      @keyframes border-animation {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
+      50% {
+        opacity: 1;
       }
+    }
 
-      .star {
-        position: absolute;
-        background-color: white;
-        border-radius: 50%;
-        animation: twinkle 2s infinite ease-in-out;
-      }
+    /* Pixel Character */
+    .pixel-character {
+      width: 32px;
+      height: 32px;
+      background-color: #f87171;
+      position: relative;
+    }
 
-      @keyframes twinkle {
-        0%,
-        100% {
-          opacity: 0.2;
-        }
-        50% {
-          opacity: 1;
-        }
-      }
+    .pixel-character::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: 6px;
+      width: 20px;
+      height: 8px;
+      background-color: #f87171;
+    }
 
-      /* Pixel Character */
-      .pixel-character {
-        width: 32px;
-        height: 32px;
-        background-color: #f87171;
-        position: relative;
-      }
+    .pixel-character::after {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 4px;
+      height: 4px;
+      background-color: white;
+      box-shadow: 12px 0 0 0 white;
+    }
 
-      .pixel-character::before {
-        content: "";
-        position: absolute;
-        top: -8px;
-        left: 6px;
-        width: 20px;
-        height: 8px;
-        background-color: #f87171;
-      }
+    .pixel-legs {
+      position: absolute;
+      bottom: -8px;
+      left: 4px;
+      width: 8px;
+      height: 8px;
+      background-color: #f87171;
+      box-shadow: 16px 0 0 0 #f87171;
+    }
 
-      .pixel-character::after {
-        content: "";
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        width: 4px;
-        height: 4px;
-        background-color: white;
-        box-shadow: 12px 0 0 0 white;
-      }
-
-      .pixel-legs {
-        position: absolute;
-        bottom: -8px;
-        left: 4px;
-        width: 8px;
-        height: 8px;
-        background-color: #f87171;
-        box-shadow: 16px 0 0 0 #f87171;
-      }
-
-      .scanlines {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          to bottom,
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom,
           rgba(255, 255, 255, 0) 50%,
-          rgba(0, 0, 0, 0.02) 50%
-        );
-        background-size: 100% 4px;
-        z-index: 100;
-        pointer-events: none;
-        opacity: 0.3;
-      }
+          rgba(0, 0, 0, 0.02) 50%);
+      background-size: 100% 4px;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0.3;
+    }
 
-      .crt-effect {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(
-          ellipse at center,
+    .crt-effect {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center,
           transparent 0%,
-          rgba(0, 0, 0, 0.2) 100%
-        );
-        pointer-events: none;
-        z-index: 99;
-      }
+          rgba(0, 0, 0, 0.2) 100%);
+      pointer-events: none;
+      z-index: 99;
+    }
 
-      .glow-text {
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.7),
-          0 0 20px rgba(255, 255, 255, 0.5);
-      }
+    .glow-text {
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.7),
+        0 0 20px rgba(255, 255, 255, 0.5);
+    }
 
-      .pixel-btn {
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s;
-      }
+    .pixel-btn {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
 
-      .pixel-btn::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
+    .pixel-btn::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
           transparent,
           rgba(255, 255, 255, 0.2),
-          transparent
-        );
-        transition: all 0.5s;
-      }
+          transparent);
+      transition: all 0.5s;
+    }
 
-      .pixel-btn:hover::after {
-        left: 100%;
-      }
+    .pixel-btn:hover::after {
+      left: 100%;
+    }
 
-      .pixel-grid {
-        background-image: linear-gradient(
-            rgba(0, 0, 0, 0.1) 1px,
-            transparent 1px
-          ),
-          linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-        background-size: 20px 20px;
-      }
+    .pixel-grid {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.1) 1px,
+          transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
 
-      /* 8-bit cloud */
-      .cloud-8bit {
-        position: relative;
-        width: 48px;
-        height: 24px;
-        background: white;
-        border-radius: 12px;
-      }
+    /* 8-bit cloud */
+    .cloud-8bit {
+      position: relative;
+      width: 48px;
+      height: 24px;
+      background: white;
+      border-radius: 12px;
+    }
 
-      .cloud-8bit::before {
-        content: "";
-        position: absolute;
-        top: -12px;
-        left: 12px;
+    .cloud-8bit::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 12px;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: -16px 0 0 8px white, 16px 0 0 8px white;
+    }
+
+    /* Coin animation */
+    @keyframes coin-spin {
+      0% {
+        transform: rotateY(0deg);
         width: 24px;
-        height: 24px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: -16px 0 0 8px white, 16px 0 0 8px white;
       }
 
-      /* Coin animation */
-      @keyframes coin-spin {
-        0% {
-          transform: rotateY(0deg);
-          width: 24px;
-        }
-        25% {
-          transform: rotateY(90deg);
-          width: 8px;
-        }
-        50% {
-          transform: rotateY(180deg);
-          width: 24px;
-        }
-        75% {
-          transform: rotateY(270deg);
-          width: 8px;
-        }
-        100% {
-          transform: rotateY(360deg);
-          width: 24px;
-        }
+      25% {
+        transform: rotateY(90deg);
+        width: 8px;
       }
 
-      .coin-8bit {
+      50% {
+        transform: rotateY(180deg);
         width: 24px;
-        height: 24px;
-        background: #facc15;
-        border-radius: 50%;
-        border: 2px solid #eab308;
-        animation: coin-spin 2s infinite linear;
-        transform-style: preserve-3d;
       }
-    </style>
-  </head>
 
-  <body class="min-h-screen relative overflow-hidden">
-    <!-- CRT and Scanline Effects -->
-    <div class="scanlines"></div>
-    <div class="crt-effect"></div>
+      75% {
+        transform: rotateY(270deg);
+        width: 8px;
+      }
 
-    <!-- Stars background -->
-    <div
-      id="stars-container"
-      class="fixed top-0 left-0 w-full h-full z-0"
-    ></div>
+      100% {
+        transform: rotateY(360deg);
+        width: 24px;
+      }
+    }
 
-    <!-- Sky background with pixel grid -->
-    <div class="absolute inset-0 bg-sky-300 pixel-grid z-0"></div>
+    .coin-8bit {
+      width: 24px;
+      height: 24px;
+      background: #facc15;
+      border-radius: 50%;
+      border: 2px solid #eab308;
+      animation: coin-spin 2s infinite linear;
+      transform-style: preserve-3d;
+    }
+  </style>
+</head>
 
-    <!-- Floating clouds -->
-    <div class="absolute top-20 left-10 animate-float z-10">
-      <div class="cloud-8bit"></div>
+<body class="min-h-screen relative overflow-x-hidden">
+  <!-- CRT and Scanline Effects -->
+  <div class="scanlines"></div>
+  <div class="crt-effect"></div>
+
+  <!-- Stars background -->
+  <div id="stars-container" class="fixed top-0 left-0 w-full h-full z-0"></div>
+
+  <!-- Sky background with pixel grid -->
+  <div class="absolute inset-0 bg-sky-300 pixel-grid z-0"></div>
+
+  <!-- Floating clouds -->
+  <div class="absolute top-20 left-10 animate-float z-10">
+    <div class="cloud-8bit"></div>
+  </div>
+  <div class="absolute top-40 right-20 animate-float-delay z-10">
+    <div class="cloud-8bit scale-125"></div>
+  </div>
+  <div class="absolute bottom-40 left-1/4 animate-float z-10">
+    <div class="cloud-8bit scale-75"></div>
+  </div>
+
+  <!-- Floating platforms -->
+  <div class="absolute top-1/4 left-10 z-10 animate-float">
+    <div class="platform w-24 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative shadow-lg">
+      <div class="absolute top-0 left-0 w-full h-1 bg-green-400"></div>
+      <div class="absolute -top-4 left-0 w-full h-4 bg-yellow-800 border-t-4 border-yellow-700"></div>
     </div>
-    <div class="absolute top-40 right-20 animate-float-delay z-10">
-      <div class="cloud-8bit scale-125"></div>
+  </div>
+  <div class="absolute top-1/3 right-20 z-10 animate-float-delay">
+    <div class="platform w-32 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative shadow-lg">
+      <div class="absolute top-0 left-0 w-full h-1 bg-green-400"></div>
+      <div class="absolute -top-4 left-0 w-full h-4 bg-yellow-800 border-t-4 border-yellow-700"></div>
     </div>
-    <div class="absolute bottom-40 left-1/4 animate-float z-10">
-      <div class="cloud-8bit scale-75"></div>
+  </div>
+  <div class="absolute bottom-1/4 left-1/3 z-10 animate-float">
+    <div class="platform w-28 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative shadow-lg">
+      <div class="absolute top-0 left-0 w-full h-1 bg-green-400"></div>
+      <div class="absolute -top-4 left-0 w-full h-4 bg-yellow-800 border-t-4 border-yellow-700"></div>
     </div>
+  </div>
 
-    <!-- Floating platforms -->
-    <div class="absolute top-1/4 left-10 z-10 animate-float">
-      <div
-        class="platform w-24 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative shadow-lg"
-      >
-        <div class="absolute top-0 left-0 w-full h-1 bg-green-400"></div>
+  <!-- Animated pixel character -->
+  <div class="absolute bottom-1/4 right-1/4 z-20 animate-jump">
+    <div class="pixel-character">
+      <div class="pixel-legs"></div>
+    </div>
+  </div>
+
+  <!-- Moving character -->
+  <div class="absolute bottom-1/3 left-0 z-20 animate-pixel-move" style="animation-delay: -5s">
+    <div class="pixel-character" style="background-color: #a78bfa">
+      <div class="pixel-legs" style="background-color: #a78bfa; box-shadow: 16px 0 0 0 #a78bfa"></div>
+    </div>
+  </div>
+
+  <!-- Coins -->
+  <div class="absolute top-1/3 right-1/4 animate-pulse-slow z-10">
+    <div class="coin-8bit"></div>
+  </div>
+  <div class="absolute bottom-1/3 left-1/5 animate-bounce-slow z-10">
+    <div class="coin-8bit"></div>
+  </div>
+  <div class="absolute top-2/3 right-1/5 animate-pulse z-10">
+    <div class="coin-8bit scale-75"></div>
+  </div>
+
+  <!-- Marquee text -->
+  <div class="absolute top-5 w-full overflow-hidden z-30">
+    <div class="whitespace-nowrap animate-marquee">
+      <span class="inline-block font-arcade text-xs text-white px-4 py-1 bg-red-500/70 rounded-full mx-2">WELCOME TO
+        LEVEL UP QUIZ!</span>
+      <span class="inline-block font-arcade text-xs text-white px-4 py-1 bg-blue-500/70 rounded-full mx-2">TEST YOUR
+        KNOWLEDGE!</span>
+      <span class="inline-block font-arcade text-xs text-white px-4 py-1 bg-green-500/70 rounded-full mx-2">EARN HIGH
+        SCORES!</span>
+      <span class="inline-block font-arcade text-xs text-white px-4 py-1 bg-yellow-500/70 rounded-full mx-2">CHALLENGE
+        YOURSELF!</span>
+      <span class="inline-block font-arcade text-xs text-white px-4 py-1 bg-purple-500/70 rounded-full mx-2">BECOME A
+        QUIZ MASTER!</span>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="container mx-auto px-4 py-8 relative z-20 pt-32">
+    <div class="max-w-2xl mx-auto">
+      <div class="max-w-2xl mx-auto flex flex-col items-center">
+        <!-- Title with glitch effect -->
+        <h1
+          class="text-4xl md:text-6xl font-arcade text-white mb-8 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] glow-text animate-pulse-slow relative text-center w-full">
+          <span class="animate-glitch inline-block">LEVEL UP QUIZ</span>
+          <div class="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-xl -z-10"></div>
+        </h1>
+
+        <!-- Game card with pixel border -->
         <div
-          class="absolute -top-4 left-0 w-full h-4 bg-yellow-800 border-t-4 border-yellow-700"
-        ></div>
-      </div>
-    </div>
-    <div class="absolute top-1/3 right-20 z-10 animate-float-delay">
-      <div
-        class="platform w-32 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative shadow-lg"
-      >
-        <div class="absolute top-0 left-0 w-full h-1 bg-green-400"></div>
-        <div
-          class="absolute -top-4 left-0 w-full h-4 bg-yellow-800 border-t-4 border-yellow-700"
-        ></div>
-      </div>
-    </div>
-    <div class="absolute bottom-1/4 left-1/3 z-10 animate-float">
-      <div
-        class="platform w-28 h-8 bg-green-600 border-t-4 border-green-500 rounded-sm relative shadow-lg"
-      >
-        <div class="absolute top-0 left-0 w-full h-1 bg-green-400"></div>
-        <div
-          class="absolute -top-4 left-0 w-full h-4 bg-yellow-800 border-t-4 border-yellow-700"
-        ></div>
-      </div>
-    </div>
+          class="bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-2xl w-full max-w-xl pixel-border relative overflow-hidden">
+          <!-- Blinking cursor -->
+          <div class="absolute top-4 right-4 w-4 h-4 bg-red-500 animate-blink"></div>
 
-    <!-- Animated pixel character -->
-    <div class="absolute bottom-1/4 right-1/4 z-20 animate-jump">
-      <div class="pixel-character">
-        <div class="pixel-legs"></div>
-      </div>
-    </div>
+          <h2 class="text-3xl font-arcade mb-6 text-center text-gray-800">
+            HOW IT WORKS
+          </h2>
 
-    <!-- Moving character -->
-    <div
-      class="absolute bottom-1/3 left-0 z-20 animate-pixel-move"
-      style="animation-delay: -5s"
-    >
-      <div class="pixel-character" style="background-color: #a78bfa">
-        <div
-          class="pixel-legs"
-          style="background-color: #a78bfa; box-shadow: 16px 0 0 0 #a78bfa"
-        ></div>
-      </div>
-    </div>
-
-    <!-- Coins -->
-    <div class="absolute top-1/3 right-1/4 animate-pulse-slow z-10">
-      <div class="coin-8bit"></div>
-    </div>
-    <div class="absolute bottom-1/3 left-1/5 animate-bounce-slow z-10">
-      <div class="coin-8bit"></div>
-    </div>
-    <div class="absolute top-2/3 right-1/5 animate-pulse z-10">
-      <div class="coin-8bit scale-75"></div>
-    </div>
-
-    <!-- Marquee text -->
-    <div class="absolute top-5 w-full overflow-hidden z-30">
-      <div class="whitespace-nowrap animate-marquee">
-        <span
-          class="inline-block font-arcade text-xs text-white px-4 py-1 bg-red-500/70 rounded-full mx-2"
-          >WELCOME TO LEVEL UP QUIZ!</span
-        >
-        <span
-          class="inline-block font-arcade text-xs text-white px-4 py-1 bg-blue-500/70 rounded-full mx-2"
-          >TEST YOUR KNOWLEDGE!</span
-        >
-        <span
-          class="inline-block font-arcade text-xs text-white px-4 py-1 bg-green-500/70 rounded-full mx-2"
-          >EARN HIGH SCORES!</span
-        >
-        <span
-          class="inline-block font-arcade text-xs text-white px-4 py-1 bg-yellow-500/70 rounded-full mx-2"
-          >CHALLENGE YOURSELF!</span
-        >
-        <span
-          class="inline-block font-arcade text-xs text-white px-4 py-1 bg-purple-500/70 rounded-full mx-2"
-          >BECOME A QUIZ MASTER!</span
-        >
-      </div>
-    </div>
-
-    <!-- Main content -->
-    <div class="container mx-auto px-4 py-8 relative z-20 pt-32">
-      <div class="max-w-2xl mx-auto">
-        <div class="max-w-2xl mx-auto flex flex-col items-center">
-          <!-- Title with glitch effect -->
-          <h1
-            class="text-4xl md:text-6xl font-arcade text-white mb-8 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] glow-text animate-pulse-slow relative text-center w-full"
-          >
-            <span class="animate-glitch inline-block">LEVEL UP QUIZ</span>
-            <div
-              class="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-xl -z-10"
-            ></div>
-          </h1>
-
-          <!-- Game card with pixel border -->
-          <div
-            class="bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-2xl w-full max-w-xl pixel-border relative overflow-hidden"
-          >
-            <!-- Blinking cursor -->
-            <div
-              class="absolute top-4 right-4 w-4 h-4 bg-red-500 animate-blink"
-            ></div>
-
-            <h2 class="text-3xl font-arcade mb-6 text-center text-gray-800">
-              HOW IT WORKS
-            </h2>
-
-            <div class="space-y-4 font-arcade text-sm text-gray-700">
-              <div class="flex items-start">
-                <div
-                  class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0"
-                >
-                  1
-                </div>
-                <p>CHOOSE A TOPIC FOR YOUR QUIZ</p>
+          <div class="space-y-4 font-arcade text-sm text-gray-700">
+            <div class="flex items-start">
+              <div class="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0">
+                1
               </div>
-              <div class="flex items-start">
-                <div
-                  class="bg-blue-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0"
-                >
-                  2
-                </div>
-                <p>SELECT THE DIFFICULTY LEVEL</p>
-              </div>
-              <div class="flex items-start">
-                <div
-                  class="bg-green-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0"
-                >
-                  3
-                </div>
-                <p>PICK THE NUMBER OF QUESTIONS (1-10)</p>
-              </div>
-              <div class="flex items-start">
-                <div
-                  class="bg-yellow-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0"
-                >
-                  4
-                </div>
-                <p>SELECT THE QUESTION TYPE</p>
-              </div>
-              <div class="flex items-start">
-                <div
-                  class="bg-purple-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0"
-                >
-                  5
-                </div>
-                <p>CLICK "START GAME" AND TEST YOUR KNOWLEDGE!</p>
-              </div>
+              <p>CHOOSE A TOPIC FOR YOUR QUIZ</p>
             </div>
-
-            <div class="mt-8 flex justify-between items-center">
-              <div class="flex items-center">
-                <div class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
-                <div class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></div>
-                <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+            <div class="flex items-start">
+              <div class="bg-blue-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0">
+                2
               </div>
-              <div class="font-arcade text-xs text-gray-500">v1.0.0</div>
+              <p>SELECT THE DIFFICULTY LEVEL</p>
             </div>
-
-            <footer class="mt-6 text-center font-arcade text-xs text-gray-500">
-              © 2025 AI QUIZ GENERATOR - TEAM 1 - DEVPLUS
-            </footer>
+            <div class="flex items-start">
+              <div class="bg-green-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0">
+                3
+              </div>
+              <p>PICK THE NUMBER OF QUESTIONS (1-10)</p>
+            </div>
+            <div class="flex items-start">
+              <div class="bg-yellow-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0">
+                4
+              </div>
+              <p>SELECT THE QUESTION TYPE</p>
+            </div>
+            <div class="flex items-start">
+              <div class="bg-purple-500 text-white w-8 h-8 flex items-center justify-center rounded mr-3 flex-shrink-0">
+                5
+              </div>
+              <p>CLICK "START GAME" AND TEST YOUR KNOWLEDGE!</p>
+            </div>
           </div>
 
-          <!-- Create Quiz Button -->
-          <div class="mt-8 w-full flex justify-center text-center">
-            <a
-              href="./components/home/Home.html"
-              class="w-full max-w-xs py-4 px-8 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-arcade rounded-lg shadow-lg transition transform hover:scale-105 active:scale-95 border-b-4 border-red-700 active:border-b-0 active:translate-y-1 pixel-btn"
-            >
-              <span class="flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6 mr-2 animate-pulse"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                  />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                CREATE QUIZ
-              </span>
-            </a>
+          <div class="mt-8 flex justify-between items-center">
+            <div class="flex items-center">
+              <div class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+              <div class="w-4 h-4 bg-yellow-500 rounded-full mr-2"></div>
+              <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+            </div>
+            <div class="font-arcade text-xs text-gray-500">v1.0.0</div>
           </div>
+
+          <footer class="mt-6 text-center font-arcade text-xs text-gray-500">
+            © 2025 AI QUIZ GENERATOR - TEAM 1 - DEVPLUS
+          </footer>
+        </div>
+
+        <!-- Create Quiz Button -->
+        <div class="mt-8 w-full flex justify-center text-center">
+          <a href="./components/home/Home.html"
+            class="w-full max-w-xs py-4 px-8 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-arcade rounded-lg shadow-lg transition transform hover:scale-105 active:scale-95 border-b-4 border-red-700 active:border-b-0 active:translate-y-1 pixel-btn">
+            <span class="flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 animate-pulse" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              CREATE QUIZ
+            </span>
+          </a>
         </div>
       </div>
     </div>
+  </div>
 
-    <script>
-      // Create stars for background
-      document.addEventListener("DOMContentLoaded", function () {
-        const starsContainer = document.getElementById("stars-container");
-        const starCount = 100;
+  <script>
+    // Create stars for background
+    document.addEventListener("DOMContentLoaded", function () {
+      const starsContainer = document.getElementById("stars-container");
+      const starCount = 100;
 
-        for (let i = 0; i < starCount; i++) {
-          const star = document.createElement("div");
-          star.classList.add("star");
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement("div");
+        star.classList.add("star");
 
-          // Random size between 1-3px
-          const size = Math.random() * 2 + 1;
-          star.style.width = `${size}px`;
-          star.style.height = `${size}px`;
+        // Random size between 1-3px
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
 
-          // Random position
-          star.style.left = `${Math.random() * 100}%`;
-          star.style.top = `${Math.random() * 100}%`;
+        // Random position
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
 
-          // Random animation delay
-          star.style.animationDelay = `${Math.random() * 2}s`;
+        // Random animation delay
+        star.style.animationDelay = `${Math.random() * 2}s`;
 
-          starsContainer.appendChild(star);
-        }
+        starsContainer.appendChild(star);
+      }
 
-        // Add audio effects
-        const audioContext = new (window.AudioContext ||
-          window.webkitAudioContext)();
+      // Add audio effects
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
 
-        // Function to create 8-bit sound
-        function playRetroSound(freq, duration) {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
+      // Function to create 8-bit sound
+      function playRetroSound(freq, duration) {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
 
-          oscillator.type = "square";
-          oscillator.frequency.value = freq;
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
+        oscillator.type = "square";
+        oscillator.frequency.value = freq;
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
-          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(
-            0.01,
-            audioContext.currentTime + duration
-          );
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioContext.currentTime + duration
+        );
 
-          oscillator.start();
-          oscillator.stop(audioContext.currentTime + duration);
-        }
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + duration);
+      }
 
-        // Play sound on button hover
-        const button = document.querySelector(".pixel-btn");
-        button.addEventListener("mouseenter", () => {
-          playRetroSound(440, 0.1);
-        });
-
-        // Play sound on button click
-        button.addEventListener("click", () => {
-          playRetroSound(660, 0.15);
-        });
+      // Play sound on button hover
+      const button = document.querySelector(".pixel-btn");
+      button.addEventListener("mouseenter", () => {
+        playRetroSound(440, 0.1);
       });
-    </script>
-  </body>
+
+      // Play sound on button click
+      button.addEventListener("click", () => {
+        playRetroSound(660, 0.15);
+      });
+    });
+  </script>
+</body>
+
 </html>
