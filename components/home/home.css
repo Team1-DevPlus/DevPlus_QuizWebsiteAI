@@ -13,7 +13,6 @@
 
 /* Custom animations */
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0);
@@ -44,7 +43,7 @@
 
 .cloud:before,
 .cloud:after {
-  content: '';
+  content: "";
   position: absolute;
   background: white;
   border-radius: 50%;
@@ -70,7 +69,7 @@
 }
 
 .coin:before {
-  content: '$';
+  content: "$";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -142,7 +141,7 @@
 
 /* Font classes */
 .font-arcade {
-  font-family: 'Press Start 2P', monospace;
+  font-family: "Press Start 2P", monospace;
 }
 
 /* Question Card Styling */
@@ -214,4 +213,38 @@ body {
 .preview-question {
   margin-bottom: 16px;
   /* Thêm khoảng cách giữa các câu hỏi */
+}
+
+/* Add to your CSS file */
+code.inline-code {
+  font-family: monospace;
+  background-color: #f0f0f0;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #d63384;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+pre.code-block {
+  background-color: #f8f8f8;
+  border: 1px solid #e8e8e8;
+  border-radius: 5px;
+  padding: 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+pre.code-block code {
+  display: block;
+  white-space: pre;
+}
+
+/* This will help ensure HTML tags in questions display properly */
+.preview-question h3,
+.result-question h4 {
+  overflow-wrap: break-word;
 }
